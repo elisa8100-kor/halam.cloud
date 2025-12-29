@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>One Step Closer</title>
+  <title>One Step Closer~!</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
     body {
@@ -74,7 +74,6 @@
       input.addEventListener("input", () => {
         input.value = input.value.toLowerCase();
 
-        // 🔑 핵심: 글자 입력 즉시 다음 칸으로 이동
         if (input.value && i < inputs.length - 1) {
           inputs[i + 1].focus();
         }
