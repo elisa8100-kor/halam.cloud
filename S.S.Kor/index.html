@@ -1,1 +1,121 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>미니 주식 시뮬레이터</title>
+  <style>
+    body {
+      font-family: "Pretendard", sans-serif;
+      background-color: #0f172a;
+      color: #e2e8f0;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background-color: #1e293b;
+      padding: 20px;
+      font-size: 1.5em;
+    }
+    main {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+    .stock {
+      background-color: #1e293b;
+      padding: 20px;
+      border-radius: 15px;
+      width: 280px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    }
+    .stock h2 {
+      margin-bottom: 5px;
+    }
+    .price {
+      font-size: 2em;
+      font-weight: bold;
+    }
+    .buttons {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    button {
+      padding: 10px 15px;
+      border: none;
+      border-radius: 10px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .buy { background-color: #10b981; color: white; }
+    .sell { background-color: #ef4444; color: white; }
+    .buy:hover { background-color: #059669; }
+    .sell:hover { background-color: #dc2626; }
+    .info {
+      margin-top: 10px;
+      font-size: 0.9em;
+    }
+  </style>
+</head>
+<body>
+  <header>💹 미니 주식 시뮬레이터</header>
+  <main>
+    <div class="stock">
+      <h2>GPT전자</h2>
+      <div id="price" class="price">₩1000</div>
+      <div class="buttons">
+        <button class="buy" onclick="buyStock()">매수</button>
+        <button class="sell" onclick="sellStock()">매도</button>
+      </div>
+      <div class="info">
+        <p>보유 주식: <span id="owned">0</span>주</p>
+        <p>잔액: ₩<span id="money">10000</span></p>
+      </div>
+    </div>
+  </main>
 
+  <script>
+    let price = 1000;
+    let money = 10000;
+    let owned = 0;
+
+    // 주가 실시간 변동
+    setInterval(() => {
+      const change = Math.floor(Math.random() * 201) - 100; // -100 ~ +100
+      price = Math.max(100, price + change); // 100원 이하로는 안 떨어지게
+      document.getElementById("price").textContent = "₩" + price;
+      document.getElementById("price").style.color = change >= 0 ? "#10b981" : "#ef4444";
+    }, 1000);
+
+    function buyStock() {
+      if (money >= price) {
+        owned++;
+        money -= price;
+        updateInfo();
+      } else {
+        alert("잔액이 부족합니다!");
+      }
+    }
+
+    function sellStock() {
+      if (owned > 0) {
+        owned--;
+        money += price;
+        updateInfo();
+      } else {
+        alert("보유 주식이 없습니다!");
+      }
+    }
+
+    function updateInfo() {
+      document.getElementById("owned").textContent = owned;
+      document.getElementById("money").textContent = money;
+    }
+  </script>
+</body>
+</html>
