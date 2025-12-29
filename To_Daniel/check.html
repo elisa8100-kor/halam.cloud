@@ -25,21 +25,9 @@
       box-shadow: 0 20px 40px rgba(0,0,0,0.5);
     }
 
-    h1 {
-      font-size: 20px;
-      margin-bottom: 14px;
-    }
-
-    p {
-      font-size: 15px;
-      line-height: 1.6;
-      margin-bottom: 18px;
-    }
-
     .inputs {
       display: flex;
       gap: 6px;
-      margin-bottom: 16px;
     }
 
     .inputs input {
@@ -52,19 +40,8 @@
       outline: none;
     }
 
-    button {
-      width: 100%;
-      padding: 12px;
-      font-size: 15px;
-      background: #2563eb;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-    }
-
     .error {
-      margin-top: 12px;
+      margin-top: 14px;
       font-size: 13px;
       color: #f87171;
       display: none;
@@ -73,14 +50,7 @@
 </head>
 <body>
   <div class="card">
-    <h1>Hi Daniel and Hannah,</h1>
-
-    <p>
-      This is Halam.<br />
-      Please enter your last name, one letter at a time.
-    </p>
-
-    <div class="inputs">
+    <div class="inputs" id="inputs">
       <input maxlength="1">
       <input maxlength="1">
       <input maxlength="1">
@@ -92,29 +62,50 @@
       <input maxlength="1">
     </div>
 
-    <button onclick="check()">Continue</button>
-
-    <div class="error" id="error">
-      That doesn’t seem right.
-    </div>
+    <div class="error" id="error">That doesn’t seem right.</div>
   </div>
 
   <script>
-    const answer = ["m","c","e","n","n","a","l","l","y"];
+    const answer = "mcennally";
+    const inputs = document.querySelectorAll("#inputs input");
+    const error = document.getElementById("error");
+
+    inputs.forEach((input, i) => {
+      input.addEventListener("input", () => {
+        input.value = input.value.toLowerCase();
+
+        // 🔑 핵심: 글자 입력 즉시 다음 칸으로 이동
+        if (input.value && i < inputs.length - 1) {
+          inputs[i + 1].focus();
+        }
+
+        check();
+      });
+
+      input.addEventListener("keydown", e => {
+        if (e.key === "Backspace" && !input.value && i > 0) {
+          inputs[i - 1].focus();
+        }
+      });
+    });
 
     function check() {
-      const inputs = document.querySelectorAll(".inputs input");
-      const error = document.getElementById("error");
-
       let value = "";
-      inputs.forEach(i => value += i.value.toLowerCase());
+      inputs.forEach(i => value += i.value);
 
-      if (value === answer.join("")) {
-        window.location.href = "letter.html";
+      if (value.length < answer.length) {
+        error.style.display = "none";
+        return;
+      }
+
+      if (value === answer) {
+        location.href = "letter.html";
       } else {
         error.style.display = "block";
       }
     }
+
+    inputs[0].focus();
   </script>
 </body>
 </html>
