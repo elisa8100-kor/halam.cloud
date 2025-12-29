@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>One Step Closer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      background: #0b1220;
+      color: #e5e7eb;
+      font-family: "Segoe UI", Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .card {
+      background: #020617;
+      padding: 32px;
+      max-width: 440px;
+      width: 90%;
+      border-radius: 14px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+    }
+
+    h1 {
+      font-size: 20px;
+      margin-bottom: 14px;
+    }
+
+    p {
+      font-size: 15px;
+      line-height: 1.6;
+      margin-bottom: 18px;
+    }
+
+    .inputs {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+
+    .inputs input {
+      width: 36px;
+      height: 42px;
+      text-align: center;
+      font-size: 16px;
+      border-radius: 6px;
+      border: none;
+      outline: none;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      font-size: 15px;
+      background: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .error {
+      margin-top: 12px;
+      font-size: 13px;
+      color: #f87171;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Hi Daniel and Hannah,</h1>
+
+    <p>
+      This is Halam.<br />
+      Please enter your last name, one letter at a time.
+    </p>
+
+    <div class="inputs">
+      <input maxlength="1">
+      <input maxlength="1">
+      <input maxlength="1">
+      <input maxlength="1">
+      <input maxlength="1">
+      <input maxlength="1">
+      <input maxlength="1">
+      <input maxlength="1">
+      <input maxlength="1">
+    </div>
+
+    <button onclick="check()">Continue</button>
+
+    <div class="error" id="error">
+      That doesn’t seem right.
+    </div>
+  </div>
+
+  <script>
+    const answer = ["m","c","e","n","n","a","l","l","y"];
+
+    function check() {
+      const inputs = document.querySelectorAll(".inputs input");
+      const error = document.getElementById("error");
+
+      let value = "";
+      inputs.forEach(i => value += i.value.toLowerCase());
+
+      if (value === answer.join("")) {
+        window.location.href = "letter.html";
+      } else {
+        error.style.display = "block";
+      }
+    }
+  </script>
+</body>
+</html>
