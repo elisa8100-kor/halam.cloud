@@ -11,7 +11,7 @@
   - 반응형 UI
   - 점수 시스템 및 타이머 구현
   - 불필요한 라이브러리 없이 동작
-- **주소**: https://halam.cloud/mole
+- **주소**:  https://halam.cloud/mole
 
 ---
 
@@ -21,7 +21,7 @@
 - **특징**
 - Next-Bar Open 체결 규칙
 - 거래 비용 반영
-- **주소**: https://halam.cloud/S.S.-Eng
+- **주소**:  https://halam.cloud/S.S.-Eng
 
 ---
 
@@ -32,7 +32,7 @@
 - 실시간 USD→KRW 환율 조회
 - 매수·매도 수수료 반영 손익 계산
 - 오프라인 환경에서도 수동 입력 계산 가능
-- **주소**: https://halam.cloud/PL
+- **주소**:  https://halam.cloud/PL
 
 ---
 
