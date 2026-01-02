@@ -1,430 +1,189 @@
-
 <!DOCTYPE html>
 <html lang="ko">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Stock Simulator — Single File</title>
+
 <style>
 :root{
-  --bg:#0b0c10; --card:#151821; --muted:#99a3b3; --text:#e9edf3; --brand:#5b8cff; --accent:#2ee59d; --danger:#ff4d61;
+  --bg:#0b0c10; --card:#151821; --muted:#99a3b3; --text:#e9edf3;
+  --brand:#5b8cff; --accent:#2ee59d; --danger:#ff4d61;
   --grid:#232634; --border:#222636;
 }
 *{box-sizing:border-box}
-html,body{height:100%}
 body{
-  margin:0;background:linear-gradient(180deg,#0a0b0f, #0c1020 40%, #0a0b0f 100%);
-  color:var(--text); font:15px/1.5 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, Apple SD Gothic Neo, Noto Sans KR, sans-serif;
+  margin:0;
+  background:#0b0c10;
+  color:var(--text);
+  font-family:system-ui, -apple-system, Segoe UI, sans-serif;
 }
-.container{max-width:1100px;margin:24px auto;padding:0 16px}
-.header{display:flex;align-items:center;gap:14px;margin-bottom:16px}
-.badge{font-size:12px;padding:4px 8px;border:1px solid #2b3042;border-radius:999px;color:#b7c2d9;background:#0e1220}
-h1{font-size:22px;margin:0}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-@media (max-width:900px){.grid{grid-template-columns:1fr}}
+.container{max-width:1100px;margin:24px auto;padding:16px}
 .card{
-  background:linear-gradient(180deg,#111526,#0f1424);
-  border:1px solid var(--border); border-radius:16px; padding:16px; box-shadow:0 10px 30px rgba(0,0,0,.28);
+  background:#151821;
+  border-radius:16px;
+  padding:16px;
+  margin-bottom:16px;
 }
-.card h2{font-size:16px;margin:0 0 10px 0;color:#dbe4ff}
-.row{display:flex;gap:10px;align-items:end;flex-wrap:wrap}
-.input,.select{
-  background:#0f1322;color:var(--text);border:1px solid #2b3042;border-radius:10px;padding:10px 12px;outline:none;min-width:110px
+h1,h2{margin:0 0 12px}
+button{
+  padding:10px 14px;
+  border-radius:10px;
+  border:none;
+  cursor:pointer;
 }
-.input:focus,.select:focus{border-color:#3b64ff}
-.btn{
-  border:1px solid #2b3042;background:#121830;color:var(--text);padding:10px 14px;border-radius:10px;cursor:pointer;
+.brand{background:#5b8cff;color:white}
+.accent{background:#2ee59d}
+.danger{background:#ff4d61;color:white}
+input,select{
+  background:#0f1322;
+  border:1px solid #2b3042;
+  border-radius:8px;
+  padding:8px;
+  color:white;
 }
-.btn:hover{border-color:#3b64ff}
-.btn.brand{background:linear-gradient(180deg,#4f73ff,#3156ff);border-color:#3156ff;color:white}
-.btn.accent{background:linear-gradient(180deg,#2ee59d,#15c57e);border:none;color:#0a0b0f}
-.btn.danger{background:linear-gradient(180deg,#ff5f74,#ff2d49);border:none;color:white}
-.small{font-size:12px;color:var(--muted)}
-.kpi{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
-.kpi .box{background:#0f1322;border:1px solid #2b3042;border-radius:12px;padding:12px}
-.kpi .box .label{font-size:11px;color:#9aa6bf}
-.kpi .box .value{font-size:18px;margin-top:4px}
-.table{width:100%;border-collapse:collapse}
-.table th,.table td{border-bottom:1px solid #20263a;padding:8px 6px;text-align:right}
-.table th:first-child,.table td:first-child{text-align:left}
-.table tr:hover{background:#0e1220}
-.flex{display:flex;gap:8px;flex-wrap:wrap}
-hr.sep{border:none;border-top:1px dashed #26304a;margin:14px 0}
-.canvas-wrap{position:relative;height:260px}
-canvas{width:100%;height:260px;background:repeating-linear-gradient(0deg,var(--grid) 0 1px, transparent 1px 26px)}
-.tag{font-size:11px;padding:2px 8px;border-radius:999px;background:#182038;border:1px solid #2b3042;color:#b9c6e4}
-footer{opacity:.6;text-align:center;margin:18px 0}
-code.inline{background:#0f1322;border:1px solid #2b3042;border-radius:6px;padding:1px 6px}
+table{
+  width:100%;
+  border-collapse:collapse;
+}
+th,td{
+  padding:6px;
+  border-bottom:1px solid #2b3042;
+  text-align:right;
+}
+th:first-child,td:first-child{text-align:left}
+canvas{width:100%;height:240px}
 </style>
 </head>
+
 <body>
-  <div class="container">
-    <div class="header">
-      <h1>Stock Simulator</h1>
-      <span class="badge">single-file</span>
-      <span class="badge">seeded prices</span>
-      <span class="badge">localStorage</span>
-    </div>
+<div class="container">
+  <h1>📈 Stock Simulator</h1>
 
-    <div class="grid">
-      <div class="card">
-        <h2>Order</h2>
-        <div class="row">
-          <label>Symbol<br><input id="sym" class="input" value="AAPL" /></label>
-          <label>Qty<br><input id="qty" type="number" class="input" value="10" min="1" /></label>
-          <label>Side<br>
-            <select id="side" class="select"><option value="buy">Buy</option><option value="sell">Sell</option></select>
-          </label>
-          <label>Type<br>
-            <select id="otype" class="select">
-              <option value="market">Market</option>
-              <option value="limit">Limit</option>
-            </select>
-          </label>
-          <label>Limit Px<br><input id="lpx" type="number" class="input" placeholder="optional" /></label>
-          <button id="place" class="btn brand">Place</button>
-        </div>
-        <div class="row" style="margin-top:10px">
-          <label>Fee (bps)<br><input id="fee" type="number" class="input" value="10" /></label>
-          <label>Slippage (bps)<br><input id="slip" type="number" class="input" value="5" /></label>
-          <button id="next" class="btn accent">Next Day ▶</button>
-          <button id="reset" class="btn danger">Reset</button>
-          <button id="export" class="btn">Export</button>
-          <label class="btn"><input id="import" type="file" hidden />Import</label>
-        </div>
-        <p class="small">Tip: market = next bar open fill; limit = next open if favorable to your limit. Fees/slippage are applied per trade.</p>
-        <hr class="sep" />
-        <div class="kpi">
-          <div class="box"><div class="label">Cash</div><div id="kpi-cash" class="value">$0</div></div>
-          <div class="box"><div class="label">Equity</div><div id="kpi-eq" class="value">$0</div></div>
-          <div class="box"><div class="label">CAGR</div><div id="kpi-cagr" class="value">—</div></div>
-          <div class="box"><div class="label">Max DD</div><div id="kpi-dd" class="value">—</div></div>
-        </div>
-      </div>
-
-      <div class="card">
-        <h2>Equity Curve</h2>
-        <div class="canvas-wrap"><canvas id="chart" width="1000" height="260"></canvas></div>
-        <div class="flex" id="tags" style="margin-top:10px"></div>
-      </div>
-
-      <div class="card">
-        <h2>Positions</h2>
-        <table class="table" id="pos">
-          <thead><tr><th>Symbol</th><th>Qty</th><th>Avg Px</th><th>Last</th><th>Unrealized</th></tr></thead>
-          <tbody></tbody>
-        </table>
-      </div>
-
-      <div class="card">
-        <h2>Fills</h2>
-        <table class="table" id="fills">
-          <thead><tr><th>Date</th><th>Symbol</th><th>Side</th><th>Qty</th><th>Fill Px</th><th>Fees</th></tr></thead>
-          <tbody></tbody>
-        </table>
-      </div>
-
-      <div class="card">
-        <h2>Orders (open)</h2>
-        <table class="table" id="orders">
-          <thead><tr><th>Date</th><th>Symbol</th><th>Side</th><th>Qty</th><th>Type</th><th>Limit</th></tr></thead>
-          <tbody></tbody>
-        </table>
-      </div>
-
-      <div class="card">
-        <h2>Prices</h2>
-        <table class="table" id="px">
-          <thead><tr><th>Symbol</th><th>Open</th><th>High</th><th>Low</th><th>Close</th></tr></thead>
-          <tbody></tbody>
-        </table>
-        <p class="small">Seeded random walk per symbol. Add more symbols by placing an order—prices auto-spawn.</p>
-      </div>
-    </div>
-
-    <footer>Made with ♥ — next-bar open fills, reproducible simulation (<code class="inline">seed</code> in saved JSON).</footer>
+  <div class="card">
+    <h2>주문</h2>
+    <input id="sym" value="AAPL">
+    <input id="qty" type="number" value="10">
+    <select id="side">
+      <option value="buy">Buy</option>
+      <option value="sell">Sell</option>
+    </select>
+    <button id="place" class="brand">주문</button>
+    <button id="next" class="accent">다음 날</button>
+    <button id="reset" class="danger">리셋</button>
   </div>
+
+  <div class="card">
+    <h2>자산 추이</h2>
+    <canvas id="chart" width="1000" height="240"></canvas>
+  </div>
+
+  <div class="card">
+    <h2>포지션</h2>
+    <table id="pos">
+      <thead>
+        <tr><th>종목</th><th>수량</th><th>평균가</th><th>현재가</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</div>
 
 <script>
 (() => {
-  // ===== Utilities =====
-  const fmt = n => (n>=0? '':'-') + '$' + Math.abs(n).toLocaleString(undefined,{maximumFractionDigits:2});
-  const fnum = n => n.toLocaleString(undefined,{maximumFractionDigits:2});
-  const today = d => new Date(d).toISOString().slice(0,10);
 
-  // Simple seeded RNG (xorshift32)
-  function makeRng(seed=123456789){
-    let x = seed|0; if(x===0) x=1;
-    return ()=>{ x^=x<<13; x^=x>>>17; x^=x<<5; return (x>>>0)/2**32; };
+const last = arr => arr[arr.length - 1];
+
+const state = {
+  cash:100000,
+  positions:{},
+  prices:{},
+  equity:[]
+};
+
+function ensureSymbol(sym){
+  if(state.prices[sym]) return;
+  let px = 100;
+  state.prices[sym] = [];
+  for(let i=0;i<20;i++){
+    px *= 1 + (Math.random()-0.5)*0.04;
+    state.prices[sym].push(px);
   }
+}
 
-  // ===== Price engine (seeded random walk OHLC) =====
-  const startDate = new Date('2022-01-03T00:00:00Z').getTime();
-  function makeSeries(symbol, seed=42, startPx=100){
-    const rand = makeRng(seed);
-    let last = startPx; const bars=[];
-    for(let i=0;i<30;i++){ // initial history
-      const vol = 0.015 + rand()*0.02; // daily vol 1.5%~3.5%
-      const drift = -0.002 + rand()*0.004; // slight drift
-      const ret = drift + (rand()*2-1)*vol;
-      const open = last * (1+(rand()*2-1)*0.002);
-      const close = Math.max(1, open*(1+ret));
-      const high = Math.max(open, close) * (1+rand()*0.004);
-      const low = Math.min(open, close) * (1-rand()*0.004);
-      const t = startDate + i*86400000;
-      bars.push({t, o:open, h:high, l:low, c:close});
-      last = close;
-    }
-    return bars;
+function placeOrder(){
+  const sym = document.getElementById('sym').value.toUpperCase();
+  const qty = +document.getElementById('qty').value;
+  const side = document.getElementById('side').value;
+  ensureSymbol(sym);
+
+  const price = last(state.prices[sym]);
+  const cost = price * qty;
+
+  if(side==='buy'){
+    if(state.cash < cost) return alert('현금 부족');
+    state.cash -= cost;
+    const p = state.positions[sym] || {qty:0,avg:0};
+    p.avg = (p.avg*p.qty + price*qty)/(p.qty+qty);
+    p.qty += qty;
+    state.positions[sym] = p;
+  }else{
+    const p = state.positions[sym];
+    if(!p || p.qty < qty) return alert('보유 부족');
+    p.qty -= qty;
+    state.cash += cost;
   }
-
-  function nextBar(prev){
-    const last = prev[prev.length-1];
-    const t = last.t + 86400000;
-    const r = makeRng((t^0x9e3779b9)>>>0); // date-based deterministic
-    const vol = 0.015 + r()*0.02, drift = -0.002 + r()*0.004, ret = drift + (r()*2-1)*vol;
-    const open = last.c * (1+(r()*2-1)*0.003);
-    const close = Math.max(1, open*(1+ret));
-    const high = Math.max(open, close) * (1+r()*0.004);
-    const low  = Math.min(open, close) * (1-r()*0.004);
-    return {t, o:open, h:high, l:low, c:close};
-  }
-
-  // ===== State =====
-  const KEY='sim:singlefile:v1';
-  const initState = () => ({
-    cash: 100000,
-    positions: {},     // {SYM:{qty, avg}}
-    orders: [],        // open orders
-    fills: [],         // executed fills
-    prices: {},        // {SYM:[{t,o,h,l,c},...]}
-    equity: [],        // [{t, value}]
-    day: 0,
-    seed: 12345,
-    settings: {feeBps:10, slippageBps:5}
-  });
-
-  let S = load() || initState();
-  const rng = makeRng(S.seed);
-
-  function save(){ localStorage.setItem(KEY, JSON.stringify(S)); }
-  function load(){ try{ return JSON.parse(localStorage.getItem(KEY)||''); }catch(e){ return null; } }
-
-  // Ensure core symbols exist if positions/orders reference them
-  function ensureSymbol(sym){
-    if(!S.prices[sym]){
-      const seed = (S.seed ^ hashCode(sym))>>>0;
-      const startPx = 60 + (rng()*140|0);
-      S.prices[sym] = makeSeries(sym, seed, startPx);
-    }
-  }
-  function hashCode(s){ let h=0; for(let i=0;i<s.length;i++) h = ((h<<5)-h + s.charCodeAt(i))|0; return h; }
-
-  // ===== Trading Engine =====
-  function placeOrder({symbol, qty, side, type, limit}){
-    ensureSymbol(symbol);
-    const nowBar = S.prices[symbol].at(-1);
-    S.orders.push({id:cryptoRandom(), date: today(nowBar.t), symbol, qty:+qty, side, type, limit: limit?+limit:null});
-    save(); render();
-  }
-
-  function stepDay(){
-    // advance prices
-    for(const sym of Object.keys(S.prices)){
-      S.prices[sym].push(nextBar(S.prices[sym]));
-    }
-    // try to fill open orders at NEXT bar open rule
-    const remaining=[];
-    for(const o of S.orders){
-      const bar = S.prices[o.symbol].at(-1); // today's bar; fill at open
-      const open = bar.o;
-      if(o.type==='market'){
-        doFill(o, open);
-      }else if(o.type==='limit'){
-        // buy fills if open <= limit; sell fills if open >= limit
-        const ok = (o.side==='buy' ? (open <= o.limit) : (open >= o.limit));
-        if(ok) doFill(o, open); else remaining.push(o);
-      }
-    }
-    S.orders = remaining;
-    S.day++;
-    markEquity();
-    save(); render();
-  }
-
-  function doFill(o, open){
-    const fee = (+S.settings.feeBps||0)/10000;
-    const slip = (+S.settings.slippageBps||0)/10000;
-    const fillPx = open * (o.side==='buy' ? (1+slip) : (1-slip));
-    const notional = fillPx * o.qty;
-    const fees = Math.max(1, notional * fee);
-    // cash & positions
-    const mult = (o.side==='buy'? +1 : -1);
-    S.cash -= mult * notional + fees; // buy reduces cash; sell increases cash
-    const P = S.positions[o.symbol] || {qty:0, avg:0};
-    const newQty = P.qty + mult*o.qty;
-    const newAvg = newQty===0 ? 0 : (P.avg*P.qty + (mult>0? fillPx*o.qty : 0)) / (newQty);
-    S.positions[o.symbol] = {qty:newQty, avg:newAvg};
-    // log fill
-    const bar = S.prices[o.symbol].at(-1);
-    S.fills.unshift({date: today(bar.t), symbol:o.symbol, side:o.side, qty:o.qty, px:fillPx, fees:+fees.toFixed(2)});
-  }
-
-  function markEquity(){
-    let mkt=0;
-    for(const [sym, pos] of Object.entries(S.positions)){
-      if(!pos.qty) continue;
-      ensureSymbol(sym);
-      const last = S.prices[sym].at(-1).c;
-      mkt += pos.qty * last;
-    }
-    S.equity.push({t: S.prices[Object.keys(S.prices)[0]]?.at(-1)?.t ?? (startDate + S.day*86400000), v: S.cash + mkt });
-  }
-
-  // ===== Metrics =====
-  function metrics(){
-    if(S.equity.length<3) return {cagr:NaN, maxdd:NaN};
-    const eq = S.equity.map(d=>d.v);
-    const rets = []; for(let i=1;i<eq.length;i++) rets.push(eq[i]/eq[i-1]-1);
-    const years = rets.length/252;
-    const cagr = Math.pow(eq.at(-1)/eq[0], 1/Math.max(1e-9,years))-1;
-    let peak = -Infinity, maxdd=0;
-    for(const v of eq){ peak=Math.max(peak,v); maxdd=Math.min(maxdd, v/peak-1); }
-    return {cagr, maxdd};
-  }
-
-  // ===== UI =====
-  const $ = s=>document.querySelector(s);
-  const $$ = s=>document.querySelectorAll(s);
-
-  function render(){
-    // KPIs
-    $('#kpi-cash').textContent = fmt(S.cash);
-    const lastEq = S.equity.at(-1)?.v ?? S.cash;
-    $('#kpi-eq').textContent = fmt(lastEq);
-    const m = metrics();
-    $('#kpi-cagr').textContent = isFinite(m.cagr)? (m.cagr*100).toFixed(2)+'%':'—';
-    $('#kpi-dd').textContent = isFinite(m.maxdd)? (m.maxdd*100).toFixed(2)+'%':'—';
-
-    // Prices table
-    const pxBody = $('#px tbody'); pxBody.innerHTML='';
-    for(const [sym, arr] of Object.entries(S.prices)){
-      const b = arr.at(-1);
-      const tr = document.createElement('tr');
-      tr.innerHTML = `<td>${sym}</td><td>${fnum(b.o)}</td><td>${fnum(b.h)}</td><td>${fnum(b.l)}</td><td>${fnum(b.c)}</td>`;
-      pxBody.appendChild(tr);
-    }
-
-    // Positions
-    const posBody = $('#pos tbody'); posBody.innerHTML='';
-    for(const [sym, p] of Object.entries(S.positions)){
-      const last = S.prices[sym]?.at(-1)?.c ?? 0;
-      const u = (last - p.avg) * p.qty;
-      const tr = document.createElement('tr');
-      tr.innerHTML = `<td>${sym}</td><td>${p.qty}</td><td>${fnum(p.avg)}</td><td>${fnum(last)}</td><td style="color:${u>=0?'#2ee59d':'#ff4d61'}">${fmt(u)}</td>`;
-      posBody.appendChild(tr);
-    }
-
-    // Orders
-    const ordBody = $('#orders tbody'); ordBody.innerHTML='';
-    for(const o of S.orders){
-      const tr = document.createElement('tr');
-      tr.innerHTML = `<td>${o.date}</td><td>${o.symbol}</td><td>${o.side}</td><td>${o.qty}</td><td>${o.type}</td><td>${o.limit??''}</td>`;
-      ordBody.appendChild(tr);
-    }
-
-    // Fills
-    const fillBody = $('#fills tbody'); fillBody.innerHTML='';
-    for(const f of S.fills){
-      const tr = document.createElement('tr');
-      tr.innerHTML = `<td>${f.date}</td><td>${f.symbol}</td><td>${f.side}</td><td>${f.qty}</td><td>${fnum(f.px)}</td><td>${fnum(f.fees)}</td>`;
-      fillBody.appendChild(tr);
-    }
-
-    // Tags
-    const tags = $('#tags'); tags.innerHTML='';
-    tags.append(...Object.keys(S.prices).map(s=>{ const el=document.createElement('span'); el.className='tag'; el.textContent=s; return el; }));
-
-    // Chart
-    drawChart();
-  }
-
-  function drawChart(){
-    const c = document.getElementById('chart'), ctx = c.getContext('2d');
-    ctx.clearRect(0,0,c.width,c.height);
-    const eq = S.equity.length? S.equity : [{t:startDate, v:S.cash}];
-    const xs = eq.map((d,i)=>i/(eq.length-1||1));
-    const min = Math.min(...eq.map(d=>d.v));
-    const max = Math.max(...eq.map(d=>d.v));
-    // axes
-    ctx.strokeStyle='#213050'; ctx.lineWidth=1;
-    for(let y=0;y<5;y++){
-      const yy = 10 + (c.height-20)*y/4;
-      ctx.beginPath(); ctx.moveTo(40,yy); ctx.lineTo(c.width-10,yy); ctx.stroke();
-    }
-    // polyline
-    ctx.beginPath();
-    ctx.strokeStyle='#6aa3ff'; ctx.lineWidth=2;
-    eq.forEach((d,i)=>{
-      const x = 40 + (c.width-60)*xs[i];
-      const y = 10 + (c.height-20)*(1 - (d.v-min)/(max-min || 1));
-      i? ctx.lineTo(x,y): ctx.moveTo(x,y);
-    });
-    ctx.stroke();
-    // labels
-    ctx.fillStyle='#9fb3d9'; ctx.font='12px ui-sans-serif';
-    ctx.fillText(fnum(max), 6, 18);
-    ctx.fillText(fnum(min), 6, c.height-8);
-  }
-
-  // ===== Handlers =====
-  $('#place').addEventListener('click', ()=>{
-    const symbol = $('#sym').value.trim().toUpperCase() || 'AAPL';
-    const qty = Math.max(1, +$('#qty').value|0);
-    const side = $('#side').value;
-    const type = $('#otype').value;
-    const limit = $('#lpx').value ? +$('#lpx').value : null;
-    placeOrder({symbol, qty, side, type, limit});
-  });
-
-  $('#next').addEventListener('click', stepDay);
-
-  $('#reset').addEventListener('click', ()=>{
-    if(!confirm('Reset simulator? This clears state.')) return;
-    S = initState();
-    ensureSymbol('AAPL'); ensureSymbol('MSFT'); ensureSymbol('TSLA');
-    markEquity(); save(); render();
-  });
-
-  $('#export').addEventListener('click', ()=>{
-    const blob = new Blob([JSON.stringify(S,null,2)], {type:'application/json'});
-    const a = Object.assign(document.createElement('a'), {href:URL.createObjectURL(blob), download:'sim-run.json'});
-    a.click();
-  });
-
-  $('#import').addEventListener('change', async (e)=>{
-    const file = e.target.files[0]; if(!file) return;
-    const text = await file.text(); const obj = JSON.parse(text);
-    S = obj; save(); render();
-  });
-
-  // Settings bindings
-  const feeEl = $('#fee'), slipEl = $('#slip');
-  feeEl.addEventListener('change', ()=>{ S.settings.feeBps = +feeEl.value||0; save(); });
-  slipEl.addEventListener('change', ()=>{ S.settings.slippageBps = +slipEl.value||0; save(); });
-
-  // ===== Bootstrap =====
-  if(Object.keys(S.prices).length===0){
-    ensureSymbol('AAPL'); ensureSymbol('MSFT'); ensureSymbol('TSLA');
-    markEquity();
-  }
-  feeEl.value = S.settings.feeBps;
-  slipEl.value = S.settings.slippageBps;
   render();
+}
 
-  function cryptoRandom(){ return Math.random().toString(36).slice(2)+Date.now().toString(36); }
+function nextDay(){
+  for(const s in state.prices){
+    let px = last(state.prices[s]);
+    px *= 1 + (Math.random()-0.5)*0.04;
+    state.prices[s].push(px);
+  }
+  render();
+}
+
+function render(){
+  const tbody = document.querySelector('#pos tbody');
+  tbody.innerHTML='';
+  for(const s in state.positions){
+    const p = state.positions[s];
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${s}</td>
+      <td>${p.qty}</td>
+      <td>${p.avg.toFixed(2)}</td>
+      <td>${last(state.prices[s]).toFixed(2)}</td>
+    `;
+    tbody.appendChild(tr);
+  }
+  drawChart();
+}
+
+function drawChart(){
+  const c = document.getElementById('chart');
+  const ctx = c.getContext('2d');
+  ctx.clearRect(0,0,c.width,c.height);
+  const eq = [];
+  let v = state.cash;
+  for(const s in state.positions){
+    v += state.positions[s].qty * last(state.prices[s]);
+  }
+  eq.push(v);
+  ctx.beginPath();
+  ctx.moveTo(0,200);
+  ctx.lineTo(1000,200-v/1000);
+  ctx.strokeStyle='#5b8cff';
+  ctx.stroke();
+}
+
+document.getElementById('place').onclick = placeOrder;
+document.getElementById('next').onclick = nextDay;
+document.getElementById('reset').onclick = () => location.reload();
+
 })();
 </script>
 </body>
 </html>
-
