@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>HTML 태그 정리 표</title>
+  <style>
+    body{
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans KR", Arial, sans-serif;
+      line-height: 1.5;
+      margin: 24px;
+      color: #111;
+    }
+    h1{
+      font-size: 20px;
+      margin: 0 0 12px 0;
+    }
+    .table-wrap{
+      overflow-x: auto;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+    }
+    table{
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 900px;
+    }
+    thead th{
+      position: sticky;
+      top: 0;
+      background: #f6f7f9;
+      z-index: 1;
+    }
+    th, td{
+      border-bottom: 1px solid #eee;
+      padding: 10px 12px;
+      vertical-align: top;
+      text-align: left;
+      font-size: 14px;
+    }
+    th{
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    tbody tr:hover{
+      background: #fafafa;
+    }
+    code{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      font-size: 13px;
+      background: #f3f4f6;
+      padding: 2px 6px;
+      border-radius: 6px;
+      display: inline-block;
+    }
+    .result{
+      white-space: nowrap;
+    }
+    .note{
+      margin-top: 12px;
+      font-size: 13px;
+      color: #444;
+    }
+  </style>
+</head>
+<body>
+  <h1>HTML 태그 정리 표</h1>
+
+  <div class="table-wrap">
+    <table aria-label="HTML 태그 정리 표">
+      <thead>
+        <tr>
+          <th>태그명</th>
+          <th>설명</th>
+          <th>예시</th>
+          <th>결과</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>&lt;h1&gt;</code></td>
+          <td>가장 중요한 제목</td>
+          <td><code>&lt;h1&gt;제목&lt;/h1&gt;</code></td>
+          <td class="result">제목(가장 큼)</td>
+        </tr>
+        <tr>
+          <td><code>&lt;h2&gt;</code></td>
+          <td>부제목</td>
+          <td><code>&lt;h2&gt;소제목&lt;/h2&gt;</code></td>
+          <td class="result">소제목</td>
+        </tr>
+        <tr>
+          <td><code>&lt;p&gt;</code></td>
+          <td>문단</td>
+          <td><code>&lt;p&gt;문단입니다&lt;/p&gt;</code></td>
+          <td class="result">문단입니다</td>
+        </tr>
+        <tr>
+          <td><code>&lt;br&gt;</code></td>
+          <td>줄바꿈</td>
+          <td><code>줄1&lt;br&gt;줄2</code></td>
+          <td class="result">줄1<br>줄2</td>
+        </tr>
+        <tr>
+          <td><code>&lt;hr&gt;</code></td>
+          <td>구분선</td>
+          <td><code>&lt;hr&gt;</code></td>
+          <td class="result"><hr></td>
+        </tr>
+        <tr>
+          <td><code>&lt;strong&gt;</code></td>
+          <td>의미 강조</td>
+          <td><code>&lt;strong&gt;중요&lt;/strong&gt;</code></td>
+          <td class="result"><strong>중요</strong></td>
+        </tr>
+        <tr>
+          <td><code>&lt;em&gt;</code></td>
+          <td>강조(기울임)</td>
+          <td><code>&lt;em&gt;강조&lt;/em&gt;</code></td>
+          <td class="result"><em>강조</em></td>
+        </tr>
+        <tr>
+          <td><code>&lt;span&gt;</code></td>
+          <td>인라인 영역</td>
+          <td><code>&lt;span&gt;텍스트&lt;/span&gt;</code></td>
+          <td class="result"><span>텍스트</span></td>
+        </tr>
+        <tr>
+          <td><code>&lt;div&gt;</code></td>
+          <td>블록 영역</td>
+          <td><code>&lt;div&gt;박스&lt;/div&gt;</code></td>
+          <td class="result"><div>박스</div></td>
+        </tr>
+        <tr>
+          <td><code>&lt;a&gt;</code></td>
+          <td>링크</td>
+          <td><code>&lt;a href="#"&gt;링크&lt;/a&gt;</code></td>
+          <td class="result"><a href="#">링크</a></td>
+        </tr>
+        <tr>
+          <td><code>&lt;img&gt;</code></td>
+          <td>이미지</td>
+          <td><code>&lt;img src="a.jpg" alt="이미지"&gt;</code></td>
+          <td class="result">이미지 표시(파일 필요)</td>
+        </tr>
+        <tr>
+          <td><code>&lt;ul&gt;</code></td>
+          <td>순서 없는 목록</td>
+          <td><code>&lt;ul&gt;&lt;li&gt;A&lt;/li&gt;&lt;/ul&gt;</code></td>
+          <td class="result">
+            <ul style="margin:0; padding-left:18px;">
+              <li>A</li>
+            </ul>
+          </td>
+        </tr>
+        <tr>
+          <td><code>&lt;ol&gt;</code></td>
+          <td>순서 있는 목록</td>
+          <td><code>&lt;ol&gt;&lt;li&gt;A&lt;/li&gt;&lt;/ol&gt;</code></td>
+          <td class="result">
+            <ol style="margin:0; padding-left:18px;">
+              <li>A</li>
+            </ol>
+          </td>
+        </tr>
+        <tr>
+          <td><code>&lt;li&gt;</code></td>
+          <td>리스트 항목</td>
+          <td><code>&lt;li&gt;항목&lt;/li&gt;</code></td>
+          <td class="result">항목(ul/ol 안에서 사용)</td>
+        </tr>
+        <tr>
+          <td><code>&lt;table&gt;</code></td>
+          <td>표</td>
+          <td><code>&lt;table&gt;...&lt;/table&gt;</code></td>
+          <td class="result">표 생성</td>
+        </tr>
+        <tr>
+          <td><code>&lt;tr&gt;</code></td>
+          <td>행</td>
+          <td><code>&lt;tr&gt;...&lt;/tr&gt;</code></td>
+          <td class="result">가로 줄</td>
+        </tr>
+        <tr>
+          <td><code>&lt;td&gt;</code></td>
+          <td>셀</td>
+          <td><code>&lt;td&gt;값&lt;/td&gt;</code></td>
+          <td class="result">값</td>
+        </tr>
+        <tr>
+          <td><code>&lt;th&gt;</code></td>
+          <td>제목 셀</td>
+          <td><code>&lt;th&gt;제목&lt;/th&gt;</code></td>
+          <td class="result"><strong>제목</strong></td>
+        </tr>
+        <tr>
+          <td><code>&lt;form&gt;</code></td>
+          <td>입력 폼</td>
+          <td><code>&lt;form&gt;...&lt;/form&gt;</code></td>
+          <td class="result">
+            <form>
+              <input type="text" placeholder="예시 입력" />
+            </form>
+          </td>
+        </tr>
+        <tr>
+          <td><code>&lt;input&gt;</code></td>
+          <td>입력창</td>
+          <td><code>&lt;input type="text"&gt;</code></td>
+          <td class="result"><input type="text" placeholder="텍스트 입력" /></td>
+        </tr>
+        <tr>
+          <td><code>&lt;button&gt;</code></td>
+          <td>버튼</td>
+          <td><code>&lt;button&gt;확인&lt;/button&gt;</code></td>
+          <td class="result"><button type="button">확인</button></td>
+        </tr>
+        <tr>
+          <td><code>&lt;label&gt;</code></td>
+          <td>입력 설명</td>
+          <td><code>&lt;label&gt;이름&lt;/label&gt;</code></td>
+          <td class="result"><label>이름</label></td>
+        </tr>
+        <tr>
+          <td><code>&lt;textarea&gt;</code></td>
+          <td>긴 입력</td>
+          <td><code>&lt;textarea&gt;&lt;/textarea&gt;</code></td>
+          <td class="result"><textarea rows="2" cols="20" placeholder="여러 줄 입력"></textarea></td>
+        </tr>
+        <tr>
+          <td><code>&lt;select&gt;</code></td>
+          <td>선택 박스</td>
+          <td><code>&lt;select&gt;&lt;option&gt;A&lt;/option&gt;&lt;/select&gt;</code></td>
+          <td class="result">
+            <select>
+              <option>A</option>
+              <option>B</option>
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <td><code>&lt;option&gt;</code></td>
+          <td>선택 항목</td>
+          <td><code>&lt;option&gt;A&lt;/option&gt;</code></td>
+          <td class="result">A(Select 안에서 사용)</td>
+        </tr>
+        <tr>
+          <td><code>&lt;header&gt;</code></td>
+          <td>상단 영역</td>
+          <td><code>&lt;header&gt;상단&lt;/header&gt;</code></td>
+          <td class="result"><header>상단</header></td>
+        </tr>
+        <tr>
+          <td><code>&lt;footer&gt;</code></td>
+          <td>하단 영역</td>
+          <td><code>&lt;footer&gt;하단&lt;/footer&gt;</code></td>
+          <td class="result"><footer>하단</footer></td>
+        </tr>
+        <tr>
+          <td><code>&lt;nav&gt;</code></td>
+          <td>메뉴 영역</td>
+          <td><code>&lt;nav&gt;메뉴&lt;/nav&gt;</code></td>
+          <td class="result"><nav>메뉴</nav></td>
+        </tr>
+        <tr>
+          <td><code>&lt;section&gt;</code></td>
+          <td>구역</td>
+          <td><code>&lt;section&gt;섹션&lt;/section&gt;</code></td>
+          <td class="result"><section>섹션</section></td>
+        </tr>
+        <tr>
+          <td><code>&lt;article&gt;</code></td>
+          <td>독립 콘텐츠</td>
+          <td><code>&lt;article&gt;글&lt;/article&gt;</code></td>
+          <td class="result"><article>글</article></td>
+        </tr>
+        <tr>
+          <td><code>&lt;main&gt;</code></td>
+          <td>핵심 내용</td>
+          <td><code>&lt;main&gt;내용&lt;/main&gt;</code></td>
+          <td class="result"><main>내용</main></td>
+        </tr>
+        <tr>
+          <td><code>&lt;aside&gt;</code></td>
+          <td>보조 영역</td>
+          <td><code>&lt;aside&gt;광고&lt;/aside&gt;</code></td>
+          <td class="result"><aside>광고</aside></td>
+        </tr>
+        <tr>
+          <td><code>&lt;figure&gt;</code></td>
+          <td>미디어 묶음</td>
+          <td><code>&lt;figure&gt;이미지&lt;/figure&gt;</code></td>
+          <td class="result"><figure style="margin:0;">이미지</figure></td>
+        </tr>
+        <tr>
+          <td><code>&lt;figcaption&gt;</code></td>
+          <td>설명</td>
+          <td><code>&lt;figcaption&gt;설명&lt;/figcaption&gt;</code></td>
+          <td class="result"><figcaption>설명</figcaption></td>
+        </tr>
+        <tr>
+          <td><code>&lt;video&gt;</code></td>
+          <td>영상</td>
+          <td><code>&lt;video controls&gt;&lt;/video&gt;</code></td>
+          <td class="result"><video controls width="220"></video></td>
+        </tr>
+        <tr>
+          <td><code>&lt;audio&gt;</code></td>
+          <td>오디오</td>
+          <td><code>&lt;audio controls&gt;&lt;/audio&gt;</code></td>
+          <td class="result"><audio controls></audio></td>
+        </tr>
+        <tr>
+          <td><code>&lt;iframe&gt;</code></td>
+          <td>외부 페이지/콘텐츠 삽입</td>
+          <td><code>&lt;iframe src=""&gt;&lt;/iframe&gt;</code></td>
+          <td class="result">외부 콘텐츠(주소 필요)</td>
+        </tr>
+        <tr>
+          <td><code>&lt;details&gt;</code></td>
+          <td>접기/펼치기</td>
+          <td><code>&lt;details&gt;&lt;summary&gt;더보기&lt;/summary&gt;내용&lt;/details&gt;</code></td>
+          <td class="result">
+            <details>
+              <summary>더보기</summary>
+              내용
+            </details>
+          </td>
+        </tr>
+        <tr>
+          <td><code>&lt;summary&gt;</code></td>
+          <td>접기/펼치기 제목</td>
+          <td><code>&lt;summary&gt;열기&lt;/summary&gt;</code></td>
+          <td class="result"><summary style="list-style:none;">열기(단독 사용은 비권장)</summary></td>
+        </tr>
+        <tr>
+          <td><code>&lt;mark&gt;</code></td>
+          <td>하이라이트</td>
+          <td><code>&lt;mark&gt;강조&lt;/mark&gt;</code></td>
+          <td class="result"><mark>강조</mark></td>
+        </tr>
+        <tr>
+          <td><code>&lt;time&gt;</code></td>
+          <td>날짜/시간</td>
+          <td><code>&lt;time&gt;2026-01-02&lt;/time&gt;</code></td>
+          <td class="result"><time>2026-01-02</time></td>
+        </tr>
+        <tr>
+          <td><code>&lt;code&gt;</code></td>
+          <td>코드 표시</td>
+          <td><code>&lt;code&gt;HTML&lt;/code&gt;</code></td>
+          <td class="result"><code>HTML</code></td>
+        </tr>
+        <tr>
+          <td><code>&lt;pre&gt;</code></td>
+          <td>공백/줄바꿈 유지</td>
+          <td><code>&lt;pre&gt;코드&lt;/pre&gt;</code></td>
+          <td class="result"><pre style="margin:0;">코드</pre></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="note">
+    팁: <code>&lt;img&gt;</code>, <code>&lt;iframe&gt;</code>, <code>&lt;video&gt;</code>는 실제 파일/주소가 있어야 화면에 의미 있게 표시됩니다.
+  </div>
+</body>
+</html>
