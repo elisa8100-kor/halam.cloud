@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Stock Simulator — Deterministic</title>
+
+<style>
+body{
+  margin:0;
+  background:#0b0c10;
+  color:#eaeaf0;
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,Noto Sans KR,sans-serif;
+}
+.container{max-width:1100px;margin:24px auto;padding:0 16px}
+h1,h2{margin:.3em 0}
+.card{
+  background:#151821;
+  border-radius:14px;
+  padding:16px;
+  margin-bottom:16px;
+  border:1px solid #222636;
+}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+input,select,button{
+  background:#0f1322;
+  color:#eaeaf0;
+  border:1px solid #2b3042;
+  border-radius:8px;
+  padding:8px;
+}
+button{cursor:pointer}
+button.primary{background:#4f73ff;border-color:#4f73ff}
+button.danger{background:#ff4d61;border-color:#ff4d61}
+table{width:100%;border-collapse:collapse;margin-top:8px}
+th,td{border-bottom:1px solid #2b3042;padding:6px;text-align:right}
+th:first-child,td:first-child{text-align:left}
+.small{opacity:.6;font-size:12px}
+.good{color:#2ee59d}
+.bad{color:#ff4d61}
+footer{text-align:center;opacity:.5;margin:16px 0}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+<h1>Stock Simulator</h1>
+<p class="small">
+이 도구는 미래 수익을 예측하지 않는다.<br>
+다만, 의사결정의 결과를 정직하게 보여준다.
+</p>
+
+<div class="card">
+<h2>📅 현재 거래일: <span id="date"></span></h2>
+</div>
+
+<div class="card">
+<h2>주문</h2>
+<div class="row">
+<input id="sym" value="AAPL" placeholder="Symbol">
+<input id="qty" type="number" min="1" value="10">
+<select id="side">
+  <option value="buy">Buy</option>
+  <option value="sell">Sell</option>
+</select>
+<button class="primary" id="orderBtn">Place Order</button>
+<button id="nextDay">Next Day</button>
+<button id="undo">Undo</button>
+<button class="danger" id="reset">Reset</button>
+</div>
+<p id="msg" class="small"></p>
+</div>
+
+<div class="card">
+<h2>자산</h2>
+<p>현금: <strong id="cash"></strong></p>
+<p>총 자산: <strong id="equity"></strong></p>
+</div>
+
+<div class="card">
+<h2>포지션</h2>
+<table>
+<thead><tr><th>Symbol</th><th>Qty</th><th>Avg</th><th>P/L</th></tr></thead>
+<tbody id="positions"></tbody>
+</table>
+</div>
+
+<div class="card">
+<h2>체결 로그</h2>
+<table>
+<thead><tr><th>Date</th><th>Symbol</th><th>Side</th><th>Qty</th><th>Price</th></tr></thead>
+<tbody id="trades"></tbody>
+</table>
+</div>
+
+<footer>Deterministic • Single-file • Educational</footer>
+</div>
+
+<script>
+/* =========================
+   Deterministic Utilities
+========================= */
+let SEED = 12345;
+function rand(){
+  SEED = (SEED * 16807) % 2147483647;
+  return SEED / 2147483647;
+}
+
+/* =========================
+   State & History
+========================= */
+const history = [];
+
+let state = {
+  date: new Date(2024,0,2),
+  cash: 100000,
+  prices:{},
+  orders:[],
+  trades:[],
+  positions:{}
+};
+
+function snapshot(){
+  history.push(JSON.stringify(state));
+  if(history.length>50) history.shift();
+}
+
+/* =========================
+   Trading Day Logic
+========================= */
+function isTradingDay(d){
+  const day=d.getDay();
+  return day!==0 && day!==6;
+}
+
+function nextTradingDay(){
+  do{
+    state.date.setDate(state.date.getDate()+1);
+  }while(!isTradingDay(state.date));
+}
+
+/* =========================
+   Price Engine
+========================= */
+function ensureSymbol(sym){
+  if(!state.prices[sym]){
+    state.prices[sym]=100+rand()*50;
+  }
+}
+
+function nextPrice(sym){
+  let p=state.prices[sym];
+  const change=(rand()-0.5)*2;
+  p=Math.max(1,p*(1+change*0.02));
+  state.prices[sym]=p;
+  return p;
+}
+
+/* =========================
+   Core Engine
+========================= */
+function placeOrder(){
+  const sym=document.getElementById('sym').value.toUpperCase();
+  const qty=+document.getElementById('qty').value;
+  const side=document.getElementById('side').value;
+
+  if(qty<=0){msg("수량 오류");return;}
+  ensureSymbol(sym);
+  snapshot();
+
+  state.orders.push({sym,qty,side});
+  msg("주문 접수");
+}
+
+function executeOrders(){
+  for(const o of state.orders){
+    const price=nextPrice(o.sym);
+    const cost=price*o.qty;
+
+    if(o.side==="buy"){
+      if(state.cash<cost){msg("현금 부족");continue;}
+      updatePosition(o.sym,o.qty,price);
+      state.cash-=cost;
+    }else{
+      const p=state.positions[o.sym];
+      if(!p||p.qty<o.qty){msg("보유 수량 부족");continue;}
+      updatePosition(o.sym,-o.qty,price);
+      state.cash+=cost;
+    }
+
+    state.trades.unshift({
+      date:state.date.toISOString().slice(0,10),
+      ...o,
+      price
+    });
+  }
+  state.orders=[];
+}
+
+/* =========================
+   Position Logic
+========================= */
+function updatePosition(sym,qty,price){
+  const p=state.positions[sym]||{qty:0,avg:0};
+  const total=p.avg*p.qty+price*qty;
+  p.qty+=qty;
+  p.avg=p.qty?total/p.qty:0;
+  if(p.qty<=0) delete state.positions[sym];
+  else state.positions[sym]=p;
+}
+
+/* =========================
+   UI Render
+========================= */
+function render(){
+  document.getElementById('date').textContent=
+    state.date.toISOString().slice(0,10);
+  document.getElementById('cash').textContent=
+    "$"+state.cash.toFixed(2);
+
+  let eq=state.cash;
+  for(const s in state.positions){
+    eq+=state.positions[s].qty*state.prices[s];
+  }
+  document.getElementById('equity').textContent="$"+eq.toFixed(2);
+
+  const pos=document.getElementById('positions');
+  pos.innerHTML="";
+  for(const s in state.positions){
+    const p=state.positions[s];
+    const pl=(state.prices[s]-p.avg)*p.qty;
+    pos.innerHTML+=
+      `<tr><td>${s}</td><td>${p.qty}</td>
+      <td>${p.avg.toFixed(2)}</td>
+      <td class="${pl>=0?'good':'bad'}">${pl.toFixed(2)}</td></tr>`;
+  }
+
+  const tr=document.getElementById('trades');
+  tr.innerHTML="";
+  for(const t of state.trades){
+    tr.innerHTML+=
+      `<tr><td>${t.date}</td><td>${t.sym}</td>
+      <td>${t.side}</td><td>${t.qty}</td><td>${t.price.toFixed(2)}</td></tr>`;
+  }
+}
+
+function msg(t){document.getElementById('msg').textContent=t}
+
+/* =========================
+   Controls
+========================= */
+document.getElementById('orderBtn').onclick=()=>{placeOrder();render()};
+document.getElementById('nextDay').onclick=()=>{
+  snapshot();
+  nextTradingDay();
+  executeOrders();
+  render();
+};
+document.getElementById('undo').onclick=()=>{
+  if(!history.length)return;
+  state=JSON.parse(history.pop());
+  render();
+};
+document.getElementById('reset').onclick=()=>{
+  if(!confirm("초기화?"))return;
+  history.length=0;
+  SEED=12345;
+  state={
+    date:new Date(2024,0,2),
+    cash:100000,prices:{},orders:[],trades:[],positions:{}
+  };
+  render();
+};
+
+render();
+</script>
+</body>
+</html>
