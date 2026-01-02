@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- 기본 SEO -->
+  <title>My Web Projects | halam.cloud</title>
+  <meta name="description" content="halam.cloud는 직접 기획·개발한 웹 프로젝트를 정리한 개인 포트폴리오 사이트입니다. 게임, 시뮬레이터, 계산기 등 순수 웹 기술 기반 프로젝트를 소개합니다.">
+  <link rel="canonical" href="https://halam.cloud/">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="My Web Projects | halam.cloud">
+  <meta property="og:description" content="직접 개발한 웹 프로젝트 모음. HTML, CSS, JavaScript 기반 포트폴리오.">
+  <meta property="og:url" content="https://halam.cloud/">
+  <meta property="og:site_name" content="halam.cloud">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="https://halam.cloud/assets/img/logo.png">
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="My Web Projects | halam.cloud">
+  <meta name="twitter:description" content="직접 개발한 웹 프로젝트 포트폴리오">
+  <meta name="twitter:image" content="https://halam.cloud/assets/img/logo.png">
+
+  <!-- Favicon -->
+  <link rel="icon" href="/assets/img/logo.png" type="image/png">
+
+  <!-- WebSite Schema (로고 포함) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "halam.cloud",
+    "url": "https://halam.cloud/",
+    "logo": "https://halam.cloud/assets/img/logo.png"
+  }
+  </script>
+
+  <!-- Breadcrumb Schema -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": "https://halam.cloud/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "Projects",
+        "item": "https://halam.cloud/"
+      }
+    ]
+  }
+  </script>
+
+  <!-- CollectionPage Schema -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "name": "My Web Projects",
+    "url": "https://halam.cloud/",
+    "hasPart": [
+      { "@type": "WebPage", "name": "두더지 잡기 게임", "url": "https://halam.cloud/mole" },
+      { "@type": "WebPage", "name": "Stock Simulator", "url": "https://halam.cloud/S.S.-Eng" },
+      { "@type": "WebPage", "name": "USD→KRW 손익 계산기", "url": "https://halam.cloud/PL" }
+    ]
+  }
+  </script>
+
+  <link rel="stylesheet" href="/assets/css/style.css">
+</head>
+
+<body>
+  <!-- 헤더 -->
+  <header style="display:flex; align-items:center; gap:16px; margin:24px;">
+    <a href="https://halam.cloud/" aria-label="halam.cloud 홈으로 이동">
+      <img src="/assets/img/logo.png"
+           alt="halam.cloud 로고"
+           width="64"
+           height="64">
+    </a>
+    <strong style="font-size:1.4rem;">halam.cloud</strong>
+  </header>
+
+  <!-- 메인 콘텐츠 -->
+  <main class="container-lg px-3 my-5 markdown-body" role="main">
+
+    <h1>My Web Projects</h1>
+
+    <p>
+      이 페이지는 직접 기획하고 구현한 웹 프로젝트들을 한데 모아 정리한 기록입니다.
+      단기 성과보다, 축적과 재사용을 염두에 두고 설계했습니다.
+    </p>
+
+    <h2>사이트 목록</h2>
+
+    <section>
+      <h3>두더지 잡기 게임</h3>
+      <ul>
+        <li><strong>설명</strong>: 두더지를 클릭해 점수를 얻는 인터랙티브 웹 게임</li>
+        <li>반응형 UI · 점수 시스템 · 타이머 구현</li>
+        <li>
+          <a href="/mole">두더지 잡기 게임 바로가기</a>
+        </li>
+      </ul>
+    </section>
+
+    <hr>
+
+    <section>
+      <h3>Stock Simulator</h3>
+      <ul>
+        <li><strong>설명</strong>: HTML만으로 동작하는 주식 시뮬레이터</li>
+        <li>Next-Bar Open 규칙 · 거래 비용 반영</li>
+        <li>
+          <a href="/S.S.-Eng">Stock Simulator 바로가기</a>
+        </li>
+      </ul>
+    </section>
+
+    <hr>
+
+    <section>
+      <h3>USD→KRW 실시간 손익 계산기</h3>
+      <ul>
+        <li><strong>설명</strong>: 환율과 수수료를 반영한 손익 계산기</li>
+        <li>
+          <a href="/PL">손익 계산기 바로가기</a>
+        </li>
+      </ul>
+    </section>
+
+    <hr>
+
+    <h2>사용 기술</h2>
+    <ul>
+      <li>HTML5 · CSS3 · Vanilla JavaScript</li>
+      <li>Canvas API · localStorage</li>
+    </ul>
+
+    <h2>개발자</h2>
+    <ul>
+      <li><strong>닉네임</strong>: John</li>
+      <li><strong>관심 분야</strong>: 웹 개발, 인터랙션</li>
+    </ul>
+
+    <p><strong>본 프로젝트들은 학습 및 개인 포트폴리오 용도로 제작되었습니다.</strong></p>
+
+  </main>
+</body>
+</html>
