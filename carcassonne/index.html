@@ -1,48 +1,68 @@
 <!doctype html>
 <html lang="ko">
 <head>
-<meta charset="utf-8">
-<title>Mini Tile Game</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<style>
-  body {
-    margin: 0;
-    background: #0f172a;
-    color: #e5e7eb;
-    font-family: system-ui, sans-serif;
-    display: flex;
-    height: 100vh;
-  }
-  #ui {
-    width: 240px;
-    padding: 16px;
-    background: #020617;
-    box-sizing: border-box;
-  }
-  button {
-    width: 100%;
-    margin-top: 8px;
-    padding: 8px;
-    font-size: 14px;
-  }
-  canvas {
-    background: #111827;
-    flex: 1;
-  }
-</style>
+  <meta charset="utf-8" />
+  <title>Mini Tile Game</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      background: #0f172a;
+      color: #e5e7eb;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont;
+    }
+
+    #ui {
+      width: 240px;
+      padding: 16px;
+      background: #020617;
+      box-sizing: border-box;
+      border-right: 1px solid #1e293b;
+    }
+
+    #ui h2 {
+      margin-top: 0;
+      font-size: 18px;
+    }
+
+    button {
+      width: 100%;
+      padding: 8px;
+      margin-top: 8px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    canvas {
+      flex: 1;
+      background: #111827;
+      display: block;
+    }
+  </style>
 </head>
+
 <body>
 
-<div id="ui">
-  <h3>Mini Tile</h3>
-  <div id="turn">턴: -</div>
-  <div id="score"></div>
-  <button onclick="rotateCurrent()">타일 회전</button>
-</div>
+  <div id="ui">
+    <h2>Mini Tile Game</h2>
+    <div id="turn">턴: -</div>
+    <div id="score">A:0 / B:0</div>
 
-<canvas id="board" width="800" height="800"></canvas>
+    <button onclick="rotateCurrent()">타일 회전</button>
 
-<script src="firebase.js"></script>
-<script src="game.js"></script>
+    <p style="margin-top:16px;font-size:12px;opacity:0.7">
+      가족용 · 비상업
+    </p>
+  </div>
+
+  <canvas id="board" width="800" height="800"></canvas>
+
+  <!-- 🔥 반드시 module -->
+  <script type="module" src="firebase.js"></script>
+  <script type="module" src="game.js"></script>
+
 </body>
 </html>
