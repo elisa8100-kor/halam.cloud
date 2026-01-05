@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>Mini Tile Game</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  body {
+    margin: 0;
+    background: #0f172a;
+    color: #e5e7eb;
+    font-family: system-ui, sans-serif;
+    display: flex;
+    height: 100vh;
+  }
+  #ui {
+    width: 240px;
+    padding: 16px;
+    background: #020617;
+    box-sizing: border-box;
+  }
+  button {
+    width: 100%;
+    margin-top: 8px;
+    padding: 8px;
+    font-size: 14px;
+  }
+  canvas {
+    background: #111827;
+    flex: 1;
+  }
+</style>
+</head>
+<body>
+
+<div id="ui">
+  <h3>Mini Tile</h3>
+  <div id="turn">턴: -</div>
+  <div id="score"></div>
+  <button onclick="rotateCurrent()">타일 회전</button>
+</div>
+
+<canvas id="board" width="800" height="800"></canvas>
+
+<script src="firebase.js"></script>
+<script src="game.js"></script>
+</body>
+</html>
