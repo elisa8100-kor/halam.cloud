@@ -95,7 +95,6 @@
     button:disabled{ opacity:.55; cursor:not-allowed; }
     .danger{ background:#5a2630; border-color:#8a3948; }
 
-    /* HUD 버튼 (캔버스 위) */
     .hudbar{
       position:fixed;
       top:12px; right:12px;
@@ -142,7 +141,6 @@
   </div>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-  <!-- Top10 닉네임 -->
   <div class="overlay" id="nameOverlay" role="dialog" aria-modal="true">
     <div class="dialog">
       <h3>Top 10에 진입했습니다</h3>
@@ -155,13 +153,153 @@
     </div>
   </div>
 
-  <script>
-    // ===== 서버 엔드포인트 =====
-    const API_BASE = (location.hostname === "localhost")
-      ? "http://localhost:3000"
-      : "https://halam.cloud";
+  <script type="module">
+    // =========================
+    // Firebase (Firestore) 연결
+    // =========================
+    // CDN ESM import (Firebase Web SDK - modular)
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import {
+      getFirestore,
+      collection,
+      addDoc,
+      getDocs,
+      query,
+      orderBy,
+      limit,
+      serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-    // ===== 상수/유틸 =====
+    // 네가 준 설정 그대로
+    const firebaseConfig = {
+      apiKey: "AIzaSyDOLOV-JRU5iKKyM2BMHS794mkuRuBHIRI",
+      authDomain: "mole-lederboard.firebaseapp.com",
+      projectId: "mole-lederboard",
+      storageBucket: "mole-lederboard.firebasestorage.app",
+      messagingSenderId: "178724392884",
+      appId: "1:178724392884:web:e8fb56533306967e06ace1"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app); // Firestore 초기화 :contentReference[oaicite:3]{index=3}
+
+    // 컬렉션명(원하면 바꿔도 됨)
+    const LB_COLLECTION = "leaderboard";
+
+    // =========================
+    // 유틸/렌더링
+    // =========================
+    const boardBody = document.getElementById('board-body');
+
+    function escapeHTML(s){
+      return String(s).replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));
+    }
+
+    function formatDateFromFirestore(createdAt){
+      // createdAt이 Firestore Timestamp면 toDate() 가능
+      try{
+        if(createdAt && typeof createdAt.toDate === "function"){
+          return createdAt.toDate().toLocaleDateString('ko-KR');
+        }
+        // 혹시 문자열/숫자면 일반 Date 처리
+        return new Date(createdAt).toLocaleDateString('ko-KR');
+      }catch{
+        return "-";
+      }
+    }
+
+    function renderBoard(rows){
+      if(!rows || rows.length===0){
+        boardBody.innerHTML = `<tr><td colspan="5">아직 등록된 점수가 없습니다.</td></tr>`;
+        return;
+      }
+      boardBody.innerHTML = rows.slice(0,10).map((r,i)=>{
+        const safeName = escapeHTML(r.name);
+        const score = Number(r.score)||0;
+        const maxCombo = Number(r.maxCombo)||0;
+        const when = formatDateFromFirestore(r.createdAt);
+        return `<tr>
+          <td>${i+1}</td>
+          <td>${safeName}</td>
+          <td>${score}</td>
+          <td>${maxCombo}</td>
+          <td>${when}</td>
+        </tr>`;
+      }).join("");
+    }
+
+    // =========================
+    // 토스트
+    // =========================
+    const toastEl = document.getElementById('toast');
+    function showToast(msg){
+      toastEl.textContent = msg;
+      toastEl.style.display = 'block';
+      clearTimeout(showToast._t);
+      showToast._t = setTimeout(()=>{ toastEl.style.display='none'; }, 1800);
+    }
+
+    // =========================
+    // Firestore 리더보드 로직
+    // =========================
+    const LB_CACHE_KEY = "wam_leaderboard_cache_v1";
+
+    async function getTop10(){
+      // score 내림차순 Top 10 :contentReference[oaicite:4]{index=4}
+      const q = query(
+        collection(db, LB_COLLECTION),
+        orderBy("score", "desc"),
+        limit(10)
+      );
+      const snap = await getDocs(q); // :contentReference[oaicite:5]{index=5}
+      return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    }
+
+    async function refreshLeaderboard(){
+      try{
+        const data = await getTop10();
+        renderBoard(data);
+        localStorage.setItem(LB_CACHE_KEY, JSON.stringify({ at:Date.now(), data }));
+      }catch(e){
+        const cached = localStorage.getItem(LB_CACHE_KEY);
+        if(cached){
+          try{
+            const obj = JSON.parse(cached);
+            renderBoard(obj.data);
+            showToast("리더보드 네트워크가 불안정합니다. 최근 캐시를 표시합니다.");
+            return;
+          }catch{}
+        }
+        boardBody.innerHTML = `<tr><td colspan="5">리더보드를 불러오지 못했습니다.</td></tr>`;
+      }
+    }
+
+    function normalizeNickname(name){
+      return name.trim().replace(/\s+/g, " ");
+    }
+    function validateNickname(name){
+      return /^[\p{L}0-9 _-]{2,12}$/u.test(name);
+    }
+
+    // Top10 진입 여부(클라이언트 판단)
+    async function qualifiesTop10(score, maxCombo){
+      const rows = await getTop10();
+      if(rows.length < 10) return { qualifies:true, cutoffScore: 0 };
+
+      // 현재 10등 점수
+      const last = rows[rows.length - 1];
+      const cutoff = Number(last.score) || 0;
+
+      // 동점 처리(옵션): score 동점이면 maxCombo로 1차 우대
+      const lastCombo = Number(last.maxCombo) || 0;
+
+      const qualifies = (score > cutoff) || (score === cutoff && maxCombo > lastCombo);
+      return { qualifies, cutoffScore: cutoff };
+    }
+
+    // =========================
+    // (아래부터 게임 원본 로직)
+    // =========================
     const W = 640, H = 720;
     const TAU = Math.PI * 2;
     const clamp = (v,min,max)=>Math.max(min,Math.min(max,v));
@@ -181,7 +319,6 @@
 
     const STATE_MENU = 0, STATE_PLAY = 1, STATE_PAUSE = 2, STATE_GAMEOVER = 3;
 
-    // ===== 캔버스(레티나) =====
     const canvas = document.getElementById('game');
     const ctx = canvas.getContext('2d', { alpha:false });
 
@@ -203,7 +340,6 @@
       ctx.fillText(text, cx, cy);
     }
 
-    // ===== 입력(포인터) =====
     let pointer = { x:0, y:0, justPressed:false, isTouch:false };
 
     function updatePointer(e){
@@ -223,7 +359,6 @@
       updatePointer(e);
       pointer.justPressed = true;
 
-      // 메뉴에서 터치로 바로 시작
       if(game.state === STATE_MENU){
         topHint = "";
         game.reset();
@@ -231,23 +366,13 @@
       }
     }, { passive:false });
 
-    // ===== 토스트 =====
-    const toastEl = document.getElementById('toast');
-    function showToast(msg){
-      toastEl.textContent = msg;
-      toastEl.style.display = 'block';
-      clearTimeout(showToast._t);
-      showToast._t = setTimeout(()=>{ toastEl.style.display='none'; }, 1800);
-    }
-
-    // ===== 파티클(풀링) =====
     class Particle {
       constructor(){ this.active=false; }
       init(x,y,color){
         const ang = rand(0,TAU), spd = rand(2,6);
         this.x=x; this.y=y;
         this.vx=Math.cos(ang)*spd; this.vy=Math.sin(ang)*spd;
-        this.life = rand(0.25, 0.45); // seconds
+        this.life = rand(0.25, 0.45);
         this.color=color;
         this.size=rand(2,4);
         this.active=true;
@@ -283,7 +408,6 @@
       draw(c){ for(const p of this.pool) p.draw(c); }
     }
 
-    // ===== 플로팅 점수 =====
     class FloatText {
       constructor(){ this.active=false; }
       init(x,y,text,color){
@@ -324,7 +448,6 @@
       draw(c){ for(const f of this.pool) f.draw(c); }
     }
 
-    // ===== 두더지(시간 기반) =====
     class Mole {
       constructor(cx,cy){
         this.cx=cx; this.cy=cy;
@@ -358,7 +481,7 @@
       }
       contains(x,y,isTouch){
         const r=this.currentRadius();
-        const bonus = isTouch ? 1.15 : 1.0; // 터치 판정 보정
+        const bonus = isTouch ? 1.15 : 1.0;
         const rr = (r*0.9*bonus);
         const dx=x-this.cx, dy=y-this.cy;
         return dx*dx+dy*dy <= rr*rr;
@@ -404,7 +527,6 @@
       }
     }
 
-    // ===== 정적 배경(구멍) 미리 그리기 =====
     const bgCanvas = document.createElement('canvas');
     bgCanvas.width = W; bgCanvas.height = H;
     const bgCtx = bgCanvas.getContext('2d');
@@ -413,7 +535,6 @@
       bgCtx.fillStyle = COLORS.BG;
       bgCtx.fillRect(0,0,W,H);
 
-      // 구멍만 미리 렌더
       bgCtx.fillStyle = COLORS.HOLE;
       for(const [x,y] of holeCenters){
         const shadowR = 36*1.15;
@@ -423,7 +544,6 @@
       }
     }
 
-    // ===== 게임 =====
     class Game {
       constructor(){
         this.state = STATE_MENU;
@@ -431,7 +551,6 @@
 
         this.highScore = Number(localStorage.getItem("wam_high_score") || 0);
 
-        // 화면 흔들림(미스 피드백)
         this.shakeT = 0;
         this.shakePower = 0;
 
@@ -456,13 +575,11 @@
         this.score=0; this.combo=0; this.maxCombo=0;
         this.elapsed=0; this.spawnTimer=0;
 
-        // 난이도(초)
         this.baseVisible = 0.80;
         this.visible = this.baseVisible;
         this.spawnInterval = 0.95;
 
-        // 적응 구간
-        this.warmup = 4.0; // first 4 seconds easier
+        this.warmup = 4.0;
 
         this.particles = new ParticlePool(240);
         this.floatText = new FloatTextPool(42);
@@ -470,14 +587,11 @@
 
       updateDifficulty(){
         const p = clamp(this.elapsed/this.timeLimit, 0, 1);
-
-        // 워밍업 동안 난이도 완화
         const warm = clamp(this.elapsed/this.warmup, 0, 1);
 
         const targetVisible = Math.max(0.28, this.baseVisible - 0.38*p);
         const targetInterval = Math.max(0.35, 0.95 - 0.60*p);
 
-        // warm이 1에 가까워질수록 목표 난이도에 수렴
         this.visible = this.baseVisible*(1-warm) + targetVisible*warm;
         this.spawnInterval = 1.05*(1-warm) + targetInterval*warm;
       }
@@ -490,7 +604,6 @@
       }
 
       missFeedback(){
-        // 아주 짧은 화면 흔들림
         this.shakeT = 0.12;
         this.shakePower = 6;
       }
@@ -514,7 +627,6 @@
     let last = performance.now();
     let topHint = "";
 
-    // ===== 키 입력 =====
     window.addEventListener('keydown', (e)=>{
       if(e.code==='Space' && game.state===STATE_MENU){
         topHint="";
@@ -528,7 +640,6 @@
       }
     });
 
-    // ===== HUD 버튼 =====
     const btnStart = document.getElementById('btnStart');
     const btnPause = document.getElementById('btnPause');
     const btnRestart = document.getElementById('btnRestart');
@@ -547,7 +658,6 @@
       game.reset(); game.state=STATE_PLAY;
     });
 
-    // ===== 메인 업데이트 =====
     function update(dt){
       if(game.state===STATE_PLAY){
         game.elapsed += dt;
@@ -565,7 +675,6 @@
         if(pointer.justPressed){
           let hit=false;
 
-          // 1회 입력당 1마리만
           for(const m of game.moles){
             if(m.contains(pointer.x, pointer.y, pointer.isTouch) && m.hit()){
               hit=true;
@@ -587,14 +696,12 @@
             game.missFeedback();
             game.floatText.pop(pointer.x, pointer.y-10, `MISS`, COLORS.RED);
 
-            // 콤보가 컸다면 안내(과도한 스팸 방지용으로 조건)
             if(prevCombo >= 8){
               showToast(`콤보 ${prevCombo}에서 끊겼습니다.`);
             }
           }
         }
 
-        // 이펙트 업데이트
         game.particles.update(dt);
         game.floatText.update(dt);
         game.updateShake(dt);
@@ -610,33 +717,25 @@
           probeAndMaybeAskName(game.score, game.maxCombo);
         }
       } else if(game.state===STATE_PAUSE){
-        // 일시정지 중에도 흔들림 잔상만 정리
         game.updateShake(dt);
       }
 
       pointer.justPressed = false;
     }
 
-    // ===== 렌더 =====
     function draw(){
-      // 배경(구멍 포함) 먼저
       ctx.drawImage(bgCanvas, 0, 0);
 
-      // 흔들림 적용(게임 플레이/오버에서만)
       const shake = (game.state===STATE_PLAY) ? game.getShakeOffset() : {x:0,y:0};
       ctx.save();
       ctx.translate(shake.x, shake.y);
 
-      // 두더지
       for(const m of game.moles) m.drawMole(ctx);
-
-      // 파티클/텍스트
       game.particles.draw(ctx);
       game.floatText.draw(ctx);
 
       ctx.restore();
 
-      // HUD
       if(game.state===STATE_MENU){
         drawTextCenter("두더지 잡기 게임", 64, COLORS.WHITE, W/2, H/2-90);
         drawTextCenter("Space 또는 시작 버튼으로 시작", 28, COLORS.WHITE, W/2, H/2-20);
@@ -657,7 +756,6 @@
         ctx.fillText(`최대 점수: ${game.highScore}`, W-18, 68);
 
         if(game.state===STATE_PAUSE){
-          // 일시정지 오버레이 느낌
           ctx.fillStyle = "rgba(0,0,0,.35)";
           ctx.fillRect(0,0,W,H);
           drawTextCenter("일시정지", 60, COLORS.WHITE, W/2, H/2-20);
@@ -685,82 +783,9 @@
     }
     requestAnimationFrame(loop);
 
-    // ====== 리더보드 ======
-    const boardBody = document.getElementById('board-body');
-
-    function escapeHTML(s){
-      return String(s).replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));
-    }
-    function formatDate(iso){
-      try{ return new Date(iso).toLocaleDateString('ko-KR'); }catch{ return "-"; }
-    }
-    function renderBoard(rows){
-      if(!rows || rows.length===0){
-        boardBody.innerHTML = `<tr><td colspan="5">아직 등록된 점수가 없습니다.</td></tr>`;
-        return;
-      }
-      boardBody.innerHTML = rows.slice(0,10).map((r,i)=>{
-        const safeName = escapeHTML(r.name);
-        const score = Number(r.score)||0;
-        const maxCombo = Number(r.maxCombo)||0;
-        const when = formatDate(r.created_at);
-        return `<tr>
-          <td>${i+1}</td>
-          <td>${safeName}</td>
-          <td>${score}</td>
-          <td>${maxCombo}</td>
-          <td>${when}</td>
-        </tr>`;
-      }).join("");
-    }
-
-    // fetch 타임아웃 + 1회 재시도
-    async function fetchWithTimeout(url, options={}, ms=4500){
-      const ctrl = new AbortController();
-      const t = setTimeout(()=>ctrl.abort(), ms);
-      try{
-        return await fetch(url, { ...options, signal: ctrl.signal, cache:"no-store" });
-      } finally {
-        clearTimeout(t);
-      }
-    }
-    async function fetchJsonRetry(url, options={}, ms=4500){
-      // 1회 재시도
-      for(let attempt=0; attempt<2; attempt++){
-        try{
-          const res = await fetchWithTimeout(url, options, ms);
-          if(!res.ok) throw new Error("http error");
-          return await res.json();
-        }catch(e){
-          if(attempt===1) throw e;
-          await new Promise(r=>setTimeout(r, 500));
-        }
-      }
-    }
-
-    const LB_CACHE_KEY = "wam_leaderboard_cache_v1";
-
-    async function refreshLeaderboard(){
-      try{
-        const data = await fetchJsonRetry(`${API_BASE}/api/leaderboard`);
-        renderBoard(data);
-        localStorage.setItem(LB_CACHE_KEY, JSON.stringify({ at:Date.now(), data }));
-      }catch{
-        // 캐시가 있으면 캐시로 표시
-        const cached = localStorage.getItem(LB_CACHE_KEY);
-        if(cached){
-          try{
-            const obj = JSON.parse(cached);
-            renderBoard(obj.data);
-            showToast("리더보드 네트워크가 불안정합니다. 최근 캐시를 표시합니다.");
-            return;
-          }catch{}
-        }
-        boardBody.innerHTML = `<tr><td colspan="5">리더보드를 불러오지 못했습니다.</td></tr>`;
-      }
-    }
-
-    // ====== Top10 저장 ======
+    // =========================
+    // Top10 저장(UI)
+    // =========================
     const nameOverlay = document.getElementById('nameOverlay');
     const nicknameInput = document.getElementById('nickname');
     const submitNameBtn = document.getElementById('submitName');
@@ -768,29 +793,18 @@
     let pendingScore = null;
     let submitting = false;
 
-    function normalizeNickname(name){
-      return name.trim().replace(/\s+/g, " ");
-    }
-    function validateNickname(name){
-      return /^[\p{L}0-9 _-]{2,12}$/u.test(name);
-    }
-
     async function probeAndMaybeAskName(score, maxCombo){
       try{
-        const data = await fetchJsonRetry(`${API_BASE}/api/score/probe`, {
-          method:'POST',
-          headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({ score, maxCombo })
-        });
+        const result = await qualifiesTop10(score, maxCombo);
 
-        if(data.qualifies){
+        if(result.qualifies){
           topHint = "";
           pendingScore = { score, maxCombo };
           nicknameInput.value = "";
           nameOverlay.style.display = "flex";
           nicknameInput.focus();
         }else{
-          const cutoff = Number(data.cutoffScore);
+          const cutoff = Number(result.cutoffScore);
           if(Number.isFinite(cutoff) && cutoff > score){
             topHint = `Top 10까지 ${cutoff - score}점 부족합니다.`;
           }else{
@@ -823,17 +837,19 @@
       cancelNameBtn.disabled = true;
 
       try{
-        const data = await fetchJsonRetry(`${API_BASE}/api/score/submit`, {
-          method:'POST',
-          headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({ name, score: pendingScore.score, maxCombo: pendingScore.maxCombo })
+        // Firestore에 저장 :contentReference[oaicite:6]{index=6}
+        await addDoc(collection(db, LB_COLLECTION), {
+          name,
+          score: Number(pendingScore.score) || 0,
+          maxCombo: Number(pendingScore.maxCombo) || 0,
+          createdAt: serverTimestamp()
         });
 
         nameOverlay.style.display='none';
         showToast("리더보드에 저장 완료했습니다.");
         pendingScore = null;
 
-        renderBoard(data.leaderboard || []);
+        await refreshLeaderboard();
       }catch{
         showToast("저장 중 문제가 발생했습니다.");
       }finally{
@@ -854,10 +870,10 @@
       if(e.key==="Escape") cancelNameBtn.click();
     });
 
-    // ===== 초기 로드 =====
+    // 초기 로드
     refreshLeaderboard();
 
-    // ===== 힌트 문구 업데이트(상태 반영) =====
+    // 힌트 문구 업데이트
     const hintEl = document.getElementById('hint');
     setInterval(()=>{
       if(game.state === STATE_PLAY) hintEl.textContent = "타격: 클릭/터치 · P 일시정지 · R 재시작";
@@ -868,4 +884,3 @@
   </script>
 </body>
 </html>
-
