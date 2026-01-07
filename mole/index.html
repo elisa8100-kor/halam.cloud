@@ -154,34 +154,32 @@
   </div>
 
   <script type="module">
-    // =========================
-    // Firebase (Firestore) 연결
-    // =========================
-    // CDN ESM import (Firebase Web SDK - modular)
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import {
-      getFirestore,
-      collection,
-      addDoc,
-      getDocs,
-      query,
-      orderBy,
-      limit,
-      serverTimestamp
-    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  // Firebase SDK import
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import {
+    getFirestore,
+    collection,
+    addDoc,
+    getDocs,
+    query,
+    orderBy,
+    limit,
+    serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-    // 네가 준 설정 그대로
-    const firebaseConfig = {
-      apiKey: "AIzaSyDOLOV-JRU5iKKyM2BMHS794mkuRuBHIRI",
-      authDomain: "mole-lederboard.firebaseapp.com",
-      projectId: "mole-lederboard",
-      storageBucket: "mole-lederboard.firebasestorage.app",
-      messagingSenderId: "178724392884",
-      appId: "1:178724392884:web:e8fb56533306967e06ace1"
-    };
+  // Firebase 설정 (네가 준 그대로)
+  const firebaseConfig = {
+    apiKey: "AIzaSyDOLOV-JRU5iKKyM2BMHS794mkuRuBHIRI",
+    authDomain: "mole-lederboard.firebaseapp.com",
+    projectId: "mole-lederboard",
+    storageBucket: "mole-lederboard.firebasestorage.app",
+    messagingSenderId: "178724392884",
+    appId: "1:178724392884:web:e8fb56533306967e06ace1"
+  };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app); // Firestore 초기화 :contentReference[oaicite:3]{index=3}
+  // 초기화
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
 
     // 컬렉션명(원하면 바꿔도 됨)
     const LB_COLLECTION = "leaderboard";
