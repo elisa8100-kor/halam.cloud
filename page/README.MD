@@ -1,0 +1,16 @@
+/(root)
+  index.html
+  styles.css
+  /src
+    app.js
+    utils.js
+    /components
+      modal.js
+      results.js
+      form-kr.js
+      form-us.js
+    /core
+      calc-kr.js
+      calc-us.js
+      fx-service.js
+      storage.js
