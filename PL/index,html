@@ -1,269 +1,263 @@
+<!-- index.html -->
 <!doctype html>
 <html lang="ko">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>USD→KRW 실시간 손익 계산기</title>
-  <style>
-    :root{
-      --bg:#0f172a; /* slate-900 */
-      --panel:#111827; /* gray-900 */
-      --muted:#94a3b8; /* slate-400 */
-      --text:#e5e7eb;  /* gray-200 */
-      --acc:#22c55e;   /* green-500 */
-      --acc2:#60a5fa;  /* blue-400 */
-      --danger:#ef4444;/* red-500 */
-      --card:#0b1220;
-      --ring:#1f2937;
-    }
-    *{box-sizing:border-box}
-    body{margin:0;background:linear-gradient(160deg,#0b1020,#0a0f1a 60%,#0b1220);color:var(--text);font:16px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Noto Sans, Apple SD Gothic Neo, Helvetica, Arial, "Noto Sans KR", "Malgun Gothic", sans-serif}
-    .wrap{max-width:980px;margin:32px auto;padding:20px}
-    header{display:flex;gap:16px;align-items:center;justify-content:space-between;margin-bottom:16px}
-    h1{font-size:clamp(20px,3vw,28px);margin:0;font-weight:700;letter-spacing:0.3px}
-    .card{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);box-shadow:0 10px 30px rgba(0,0,0,0.35);backdrop-filter: blur(6px);border-radius:16px}
-    .grid{display:grid;grid-template-columns:1fr;gap:16px}
-    @media (min-width:840px){
-      .grid{grid-template-columns:1.2fr 1fr}
-    }
-    .panel{padding:18px 18px}
-    .section-title{font-size:14px;color:var(--muted);letter-spacing:.5px;text-transform:uppercase;margin:0 0 8px}
-    .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-    .row-3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-    label{font-size:13px;color:var(--muted);display:block;margin:0 0 6px}
-    input[type="number"], input[type="text"]{
-      width:100%;padding:12px 12px;border-radius:12px;border:1px solid var(--ring);background:#0b0f1a;color:var(--text);outline:none;transition:border .15s ease, box-shadow .15s ease
-    }
-    input:focus{border-color:var(--acc2);box-shadow:0 0 0 3px rgba(96,165,250,0.15)}
-    .btn{cursor:pointer;border:1px solid rgba(255,255,255,0.08);padding:12px 14px;border-radius:12px;background:linear-gradient(180deg,rgba(96,165,250,.18),rgba(96,165,250,.06));color:#eaf2ff;font-weight:700;letter-spacing:.3px}
-    .btn.secondary{background:linear-gradient(180deg,rgba(34,197,94,.2),rgba(34,197,94,.07))}
-    .btn.ghost{background:transparent}
-    .btn:active{transform:translateY(1px)}
-    .actions{display:flex;gap:10px;flex-wrap:wrap}
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>주식 P/L 계산기 (KR / US)</title>
+    <meta name="description" content="한국주식/미국주식 손익(P/L) 계산기. 미국주식은 매수/매도 환율을 분리해 계산합니다." />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
 
-    .result{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-    .kpi{border-radius:14px;padding:14px 14px;background:rgba(255,255,255,0.035);border:1px solid rgba(255,255,255,0.06)}
-    .kpi h3{margin:0 0 4px;font-size:12px;color:var(--muted);font-weight:600;letter-spacing:.4px;text-transform:uppercase}
-    .kpi .v{font-size:20px;font-weight:800}
-    .kpi .v.positive{color:var(--acc)}
-    .kpi .v.negative{color:var(--danger)}
-
-    .footnote{margin-top:10px;color:var(--muted);font-size:12px}
-    .small{font-size:12px;color:var(--muted)}
-    .hr{height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.08),transparent);margin:14px 0}
-    code.inline{background:#0b0f1a;border:1px solid var(--ring);padding:2px 6px;border-radius:8px}
-
-    /* ---- Made by badge (fixed bottom-right) ---- */
-    .made-by{
-      position:fixed;
-      right:12px; bottom:12px;
-      background:rgba(255,255,255,0.06);
-      border:1px solid rgba(255,255,255,0.12);
-      color:#e5e7eb;
-      padding:8px 12px;
-      border-radius:12px;
-      font-size:12px;
-      backdrop-filter: blur(6px);
-      text-decoration:none;
-      transition:transform .15s ease, background .15s ease;
-      z-index:9999;
-    }
-    .made-by:hover{ transform:translateY(-1px); background:rgba(255,255,255,0.1); }
-    .made-by:focus{ outline:2px solid var(--acc2); outline-offset:2px; }
-  </style>
-</head>
-<body>
-  <div class="wrap">
-    <header>
-      <h1>USD→KRW 실시간 손익 계산기</h1>
-      <div class="actions">
-        <button class="btn" id="btnFetch">실시간 환율 불러오기</button>
-        <button class="btn secondary" id="btnCalc">계산하기</button>
-        <button class="btn ghost" id="btnReset">초기화</button>
+  <body>
+    <header class="topbar">
+      <div class="container">
+        <div class="brand">
+          <div class="logo" aria-hidden="true">₩$</div>
+          <div class="brand-text">
+            <h1>주식 P/L 계산기</h1>
+            <p>한국주식 · 미국주식 (매수/매도 환율 분리)</p>
+          </div>
+        </div>
+        <div class="topbar-actions">
+          <button class="btn btn-ghost" id="btnOpenAbout" type="button" aria-haspopup="dialog">
+            사용법
+          </button>
+        </div>
       </div>
     </header>
 
-    <div class="grid">
-      <!-- 좌측 입력 -->
-      <div class="card panel">
-        <p class="section-title">입력값</p>
+    <main class="container">
+      <section class="hero">
+        <h2>어떤 시장을 계산할까요?</h2>
+        <p class="muted">
+          아래 카드에서 선택하면 계산 창(팝업)이 열립니다. 미국주식은 <b>매수환율</b>과 <b>매도환율(또는 현재환율)</b>을
+          따로 입력하거나 불러올 수 있어요.
+        </p>
+      </section>
 
-        <div class="row">
-          <div>
-            <label>현재가 (USD)</label>
-            <input type="number" id="currentPrice" step="0.0001" value="244.15"/>
+      <section class="grid" aria-label="시장 선택">
+        <button class="card" id="cardKR" type="button" aria-haspopup="dialog">
+          <div class="card-head">
+            <span class="pill">🇰🇷 KR</span>
+            <h3>한국주식</h3>
           </div>
-          <div>
-            <label>수량 (QTY)</label>
-            <input type="number" id="qty" step="1" value="2"/>
+          <p class="card-desc">단일 종목 손익, 수수료/세금 반영</p>
+          <div class="card-foot">
+            <span class="hint">클릭해서 계산기 열기</span>
+            <span class="arrow" aria-hidden="true">→</span>
           </div>
+        </button>
+
+        <button class="card" id="cardUS" type="button" aria-haspopup="dialog">
+          <div class="card-head">
+            <span class="pill">🇺🇸 US</span>
+            <h3>미국주식</h3>
+          </div>
+          <p class="card-desc">매수·매도 환율 분리, 원화손익/환차 분리 표시</p>
+          <div class="card-foot">
+            <span class="hint">클릭해서 계산기 열기</span>
+            <span class="arrow" aria-hidden="true">→</span>
+          </div>
+        </button>
+      </section>
+
+      <section class="footer-note">
+        <div class="note">
+          <b>확장 예정 구조</b>
+          <ul>
+            <li>거래내역(분할매수/부분매도) 테이블</li>
+            <li>다종목 포트폴리오 합산</li>
+            <li>환율 자동 불러오기(현재/과거)</li>
+          </ul>
+        </div>
+      </section>
+    </main>
+
+    <!-- MODAL: Calculator -->
+    <div class="modal-backdrop" id="modalBackdrop" hidden></div>
+
+    <section
+      class="modal"
+      id="calcModal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modalTitle"
+      hidden
+    >
+      <div class="modal-header">
+        <div>
+          <p class="modal-kicker" id="modalKicker">시장 선택</p>
+          <h3 class="modal-title" id="modalTitle">계산기</h3>
+        </div>
+        <button class="icon-btn" id="btnCloseModal" type="button" aria-label="닫기">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Market tabs (공용 모달 방식) -->
+        <div class="tabs" role="tablist" aria-label="시장 탭">
+          <button class="tab" id="tabKR" type="button" role="tab" aria-selected="false">한국주식</button>
+          <button class="tab" id="tabUS" type="button" role="tab" aria-selected="false">미국주식</button>
         </div>
 
-        <div class="row">
-          <div>
-            <label>원가(매수단가, USD)</label>
-            <input type="number" id="buyPrice" step="0.0001" value="243.295"/>
-          </div>
-          <div>
-            <label>매수 수수료율</label>
-            <input type="number" id="buyFeeRate" step="0.0001" value="0"/>
-          </div>
-        </div>
+        <!-- ====== FORM: KR ====== -->
+        <form class="form" id="formKR" autocomplete="off">
+          <div class="form-grid">
+            <div class="field">
+              <label for="krBuyPrice">매수단가 (KRW)</label>
+              <input id="krBuyPrice" name="krBuyPrice" inputmode="decimal" placeholder="예: 53000" />
+            </div>
+            <div class="field">
+              <label for="krQty">수량</label>
+              <input id="krQty" name="krQty" inputmode="numeric" placeholder="예: 10" />
+            </div>
+            <div class="field">
+              <label for="krNowPrice">현재가/매도단가 (KRW)</label>
+              <input id="krNowPrice" name="krNowPrice" inputmode="decimal" placeholder="예: 54800" />
+            </div>
 
-        <div class="row">
-          <div>
-            <label>매도 수수료율</label>
-            <input type="number" id="sellFeeRate" step="0.0001" value="0.0025"/>
+            <div class="field">
+              <label for="krFeeBuy">매수 수수료 (KRW, 선택)</label>
+              <input id="krFeeBuy" name="krFeeBuy" inputmode="decimal" placeholder="예: 1000" />
+            </div>
+            <div class="field">
+              <label for="krFeeSell">매도 수수료 (KRW, 선택)</label>
+              <input id="krFeeSell" name="krFeeSell" inputmode="decimal" placeholder="예: 1000" />
+            </div>
+            <div class="field">
+              <label for="krTaxSell">매도 세금 (KRW, 선택)</label>
+              <input id="krTaxSell" name="krTaxSell" inputmode="decimal" placeholder="예: 0" />
+            </div>
           </div>
-          <div>
-            <label>환율 (USD→KRW)</label>
-            <input type="number" id="usdKrw" step="0.0001" placeholder="실시간 불러오기를 눌러 자동 입력" />
-          </div>
-        </div>
 
-        <div class="hr"></div>
-        <p class="small">
-          계산 로직:<br>
-          <strong>총 매수금 = 원가 × 수량</strong>, 매수수수료 = 총 매수금 × 매수수수료율,<br>
-          총원가 = 총 매수금 + 매수수수료,<br>
-          실수령액 = (현재가 × 수량) − (현재가 × 수량 × 매도수수료율),<br>
-          순손익 = 실수령액 − 총원가, 수익률(%) = 순손익 / 총원가 × 100,<br>
-          손익분기 현재가 = 총원가 / (수량 × (1 − 매도수수료율)).
+          <div class="actions">
+            <button class="btn btn-secondary" id="krReset" type="button">초기화</button>
+            <button class="btn btn-primary" id="krCalc" type="button">계산하기</button>
+          </div>
+        </form>
+
+        <!-- ====== FORM: US ====== -->
+        <form class="form" id="formUS" autocomplete="off">
+          <div class="form-grid">
+            <div class="field">
+              <label for="usBuyPrice">매수단가 (USD)</label>
+              <input id="usBuyPrice" name="usBuyPrice" inputmode="decimal" placeholder="예: 150.25" />
+            </div>
+            <div class="field">
+              <label for="usQty">수량</label>
+              <input id="usQty" name="usQty" inputmode="numeric" placeholder="예: 5" />
+            </div>
+            <div class="field">
+              <label for="usNowPrice">현재가/매도단가 (USD)</label>
+              <input id="usNowPrice" name="usNowPrice" inputmode="decimal" placeholder="예: 170.10" />
+            </div>
+
+            <div class="field">
+              <label for="usFeeBuy">매수 수수료 (USD, 선택)</label>
+              <input id="usFeeBuy" name="usFeeBuy" inputmode="decimal" placeholder="예: 0" />
+            </div>
+            <div class="field">
+              <label for="usFeeSell">매도 수수료 (USD, 선택)</label>
+              <input id="usFeeSell" name="usFeeSell" inputmode="decimal" placeholder="예: 0" />
+            </div>
+
+            <div class="field">
+              <label for="usFxBuy">매수환율 (KRW/USD)</label>
+              <input id="usFxBuy" name="usFxBuy" inputmode="decimal" placeholder="예: 1330.5" />
+              <div class="mini-actions">
+                <button class="btn btn-mini" id="btnFxBuy" type="button">매수환율 불러오기</button>
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="usFxSell">매도환율 (KRW/USD)</label>
+              <input id="usFxSell" name="usFxSell" inputmode="decimal" placeholder="예: 1342.2" />
+              <div class="mini-actions">
+                <button class="btn btn-mini" id="btnFxSell" type="button">매도/현재환율 불러오기</button>
+              </div>
+            </div>
+
+            <div class="field field-wide">
+              <label class="check">
+                <input id="usIsUnrealized" type="checkbox" />
+                아직 안 팔았어요(평가손익). <span class="muted">매도환율 칸을 “현재환율”로 사용</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="actions">
+            <button class="btn btn-secondary" id="usReset" type="button">초기화</button>
+            <button class="btn btn-primary" id="usCalc" type="button">계산하기</button>
+          </div>
+        </form>
+
+        <!-- ====== RESULTS ====== -->
+        <section class="results" aria-live="polite">
+          <div class="results-head">
+            <h4>결과</h4>
+            <p class="muted" id="resultMeta">입력 후 “계산하기”를 누르세요.</p>
+          </div>
+
+          <div class="result-grid">
+            <div class="result-card">
+              <p class="label">총손익</p>
+              <p class="value" id="rTotal">-</p>
+            </div>
+            <div class="result-card">
+              <p class="label">손익률</p>
+              <p class="value" id="rRate">-</p>
+            </div>
+            <div class="result-card">
+              <p class="label">평균단가</p>
+              <p class="value" id="rAvg">-</p>
+            </div>
+            <div class="result-card">
+              <p class="label">평가금액/매도금액</p>
+              <p class="value" id="rGross">-</p>
+            </div>
+          </div>
+
+          <div class="split" id="usSplit" hidden>
+            <div class="split-row">
+              <span>주가손익(원화)</span>
+              <b id="rPricePnL">-</b>
+            </div>
+            <div class="split-row">
+              <span>환차손익(원화)</span>
+              <b id="rFxPnL">-</b>
+            </div>
+            <div class="split-row">
+              <span>USD 손익</span>
+              <b id="rUsdPnL">-</b>
+            </div>
+          </div>
+
+          <div class="toast" id="toast" hidden></div>
+        </section>
+      </div>
+    </section>
+
+    <!-- MODAL: About -->
+    <section class="modal" id="aboutModal" role="dialog" aria-modal="true" aria-labelledby="aboutTitle" hidden>
+      <div class="modal-header">
+        <div>
+          <p class="modal-kicker">가이드</p>
+          <h3 class="modal-title" id="aboutTitle">사용법</h3>
+        </div>
+        <button class="icon-btn" id="btnCloseAbout" type="button" aria-label="닫기">✕</button>
+      </div>
+      <div class="modal-body">
+        <ol class="guide">
+          <li>홈에서 한국/미국 카드를 클릭해 계산기를 여세요.</li>
+          <li>미국주식은 매수환율/매도환율을 각각 입력하거나 버튼으로 불러오세요.</li>
+          <li>“아직 안 팔았어요” 체크 시, 매도환율은 현재환율로 계산합니다.</li>
+        </ol>
+        <p class="muted small">
+          다음 단계: 거래내역(분할매수/부분매도) 테이블, 다종목 합산, 환율 히스토리 자동 조회.
         </p>
       </div>
+    </section>
 
-      <!-- 우측 결과 -->
-      <div class="card panel">
-        <p class="section-title">결과</p>
-        <div class="result">
-          <div class="kpi"><h3>현재가 (USD)</h3><div class="v" id="kCur">-</div></div>
-          <div class="kpi"><h3>환율 (USD→KRW)</h3><div class="v" id="kFx">-</div></div>
-          <div class="kpi"><h3>총원가 (수수료포함, USD)</h3><div class="v" id="kCost">-</div></div>
-          <div class="kpi"><h3>실수령액 (매도후, USD)</h3><div class="v" id="kNet">-</div></div>
-          <div class="kpi"><h3>순손익 (USD)</h3><div class="v" id="kPLusd">-</div></div>
-          <div class="kpi"><h3>순손익 (원화, KRW)</h3><div class="v" id="kPLkrw">-</div></div>
-          <div class="kpi"><h3>수익률 (%)</h3><div class="v" id="kPLpct">-</div></div>
-          <div class="kpi"><h3>손익분기 현재가 (USD)</h3><div class="v" id="kBE">-</div></div>
-        </div>
-        <p class="footnote" id="status">상태: 대기 중</p>
-      </div>
-    </div>
-
-    <p class="small" style="margin-top:14px">Tip: 오프라인/제한 환경에서는 환율 칸에 값을 직접 입력해 계산할 수 있습니다.</p>
-  </div>
-
-  <!-- Bottom-right badge -->
-  <a class="made-by" href="mailto:256344@songsu.es.kr" aria-label="made by 256344@songsu.es.kr">
-     made by 256344@songsu.es.kr
-  </a>
-
-  <script>
-    // 숫자 포맷터
-    const fmtUSD = new Intl.NumberFormat('en-US', { style:'currency', currency:'USD', maximumFractionDigits: 4 });
-    const fmtKRW = new Intl.NumberFormat('ko-KR', { style:'currency', currency:'KRW', maximumFractionDigits: 0 });
-    const fmtNum4 = new Intl.NumberFormat('en-US', { maximumFractionDigits: 4 });
-
-    // DOM 헬퍼
-    const $ = (id)=>document.getElementById(id);
-
-    // 계산 로직 (총 매수금 = 원가 × 수량)
-    function calc({ buyPrice, currentPrice, qty, buyFeeRate, sellFeeRate, usdKrw }){
-      const purchaseAmount = buyPrice * qty;            // 총 매수금
-      const buyFee = purchaseAmount * buyFeeRate;       // 매수 수수료
-      const costBasis = purchaseAmount + buyFee;        // 총원가(수수료 포함)
-
-      const grossSale = currentPrice * qty;             // 매도 총액
-      const sellFee = grossSale * sellFeeRate;          // 매도 수수료
-      const netProceeds = grossSale - sellFee;          // 실수령액
-
-      const plUSD = netProceeds - costBasis;            // 순손익(USD)
-      const plPct = costBasis !== 0 ? (plUSD / costBasis) * 100 : 0;
-      const plKRW = plUSD * usdKrw;                     // 원화 환산
-
-      const bePrice = (qty && (1 - sellFeeRate) !== 0)
-        ? (costBasis / (qty * (1 - sellFeeRate)))
-        : null;
-
-      return { currentPrice, usdKrw, costBasis, netProceeds, plUSD, plKRW, plPct, bePrice };
-    }
-
-    function readInputs(){
-      return {
-        currentPrice: parseFloat($("currentPrice").value || 0),
-        qty: parseFloat($("qty").value || 0),
-        buyPrice: parseFloat($("buyPrice").value || 0),
-        buyFeeRate: parseFloat($("buyFeeRate").value || 0),
-        sellFeeRate: parseFloat($("sellFeeRate").value || 0),
-        usdKrw: parseFloat($("usdKrw").value || 0)
-      };
-    }
-
-    function render(result){
-      if(!result){ return; }
-      $("kCur").textContent   = fmtNum4.format(result.currentPrice);
-      $("kFx").textContent    = result.usdKrw ? fmtNum4.format(result.usdKrw) : '-';
-      $("kCost").textContent  = fmtUSD.format(result.costBasis);
-      $("kNet").textContent   = fmtUSD.format(result.netProceeds);
-      const plUSDClass = result.plUSD >= 0 ? 'positive' : 'negative';
-      $("kPLusd").innerHTML   = `<span class="v ${plUSDClass}">${fmtUSD.format(result.plUSD)}</span>`;
-      const plKRWClass = result.plKRW >= 0 ? 'positive' : 'negative';
-      $("kPLkrw").innerHTML   = `<span class="v ${plKRWClass}">${fmtKRW.format(result.plKRW)}</span>`;
-      $("kPLpct").innerHTML   = `<span class="v ${plUSDClass}">${fmtNum4.format(result.plPct)}</span>`;
-      $("kBE").textContent    = result.bePrice != null ? fmtNum4.format(result.bePrice) : '-';
-    }
-
-    async function fetchUSDKRW(){
-      // exchangerate.host 무료 API 사용 (CORS 허용, 키 불필요)
-      const url = 'https://api.exchangerate.host/convert?from=USD&to=KRW';
-      const t0 = performance.now();
-      $("status").textContent = '상태: 환율 조회 중...';
-      const res = await fetch(url);
-      if(!res.ok){ throw new Error('환율 API 오류'); }
-      const data = await res.json();
-      const t1 = performance.now();
-      const rate = data && data.result ? Number(data.result) : NaN;
-      if(Number.isFinite(rate)){
-        $("usdKrw").value = rate.toFixed(4);
-        $("status").textContent = `상태: 환율 업데이트 완료 (${(t1 - t0).toFixed(0)}ms)`;
-      }else{
-        throw new Error('환율 파싱 실패');
-      }
-    }
-
-    function compute(){
-      const input = readInputs();
-      if(!Number.isFinite(input.usdKrw) || input.usdKrw <= 0){
-        $("status").textContent = '상태: 환율이 비어있습니다. 실시간 불러오기 또는 직접 입력 후 계산하세요.';
-        return;
-      }
-      const result = calc(input);
-      render(result);
-      $("status").textContent = '상태: 계산 완료';
-    }
-
-    function reset(){
-      $("currentPrice").value = 244.15;
-      $("qty").value = 2;
-      $("buyPrice").value = 243.295;
-      $("buyFeeRate").value = 0;
-      $("sellFeeRate").value = 0.0025;
-      $("usdKrw").value = '';
-      ["kCur","kFx","kCost","kNet","kPLusd","kPLkrw","kPLpct","kBE"].forEach(id=>$(id).textContent='-');
-      $("status").textContent = '상태: 대기 중';
-    }
-
-    $("btnFetch").addEventListener('click', async ()=>{
-      try{ await fetchUSDKRW(); }
-      catch(e){ $("status").textContent = '상태: 환율 조회 실패 — 환율 칸에 수동 입력하세요.'; console.error(e); }
-    });
-    $("btnCalc").addEventListener('click', compute);
-    $("btnReset").addEventListener('click', reset);
-
-    // 엔터로 계산
-    document.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ compute(); } });
-
-    // 초기 렌더
-    render(calc({ currentPrice:244.15, qty:2, buyPrice:243.295, buyFeeRate:0, sellFeeRate:0.0025, usdKrw:0 }));
-  </script>
-</body>
+    <script defer src="./app.js"></script>
+  </body>
 </html>
