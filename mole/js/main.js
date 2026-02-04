@@ -71,7 +71,7 @@ async function probeAndMaybeAskName(score, maxCombo){
       }else{
         setTopHint("Top 10에 들지 못했습니다. 더 높은 점수로 도전해보세요.");
       }
-      showToast(hintEl.textContent);
+      showToast("Top 10에 들지 못했습니다.");
     }
 
     await refreshLeaderboard(showToast);
