@@ -206,10 +206,10 @@ export function createGame(canvas){
       if(this.state==="hidden") return;
       const r=this.currentRadius();
 
-      c.fillStyle=COLORS.MOLE_SHADOW;
+      c.fillStyle="#783737";
       c.beginPath(); c.arc(this.cx,this.cy+3,r,0,TAU); c.fill();
 
-      c.fillStyle=COLORS.MOLE;
+      c.fillStyle="#d25f5f";
       c.beginPath(); c.arc(this.cx,this.cy,r,0,TAU); c.fill();
 
       const eyeR=Math.max(2, r/8);
@@ -442,21 +442,18 @@ export function createGame(canvas){
   }
   requestAnimationFrame(loop);
 
-  function bindKeys(){
-    window.addEventListener('keydown', (e)=>{
-      if(e.code==='Space' && game.state===STATE_MENU){
-        topHint="";
-        game.reset(); game.state=STATE_PLAY;
-      } else if(e.code==='KeyR' && (game.state===STATE_GAMEOVER || game.state===STATE_PAUSE || game.state===STATE_PLAY)){
-        topHint="";
-        game.reset(); game.state=STATE_PLAY;
-      } else if(e.code==='KeyP'){
-        if(game.state===STATE_PLAY) game.state=STATE_PAUSE;
-        else if(game.state===STATE_PAUSE) game.state=STATE_PLAY;
-      }
-    });
-  }
-  bindKeys();
+  window.addEventListener('keydown', (e)=>{
+    if(e.code==='Space' && game.state===STATE_MENU){
+      topHint="";
+      game.reset(); game.state=STATE_PLAY;
+    } else if(e.code==='KeyR' && (game.state===STATE_GAMEOVER || game.state===STATE_PAUSE || game.state===STATE_PLAY)){
+      topHint="";
+      game.reset(); game.state=STATE_PLAY;
+    } else if(e.code==='KeyP'){
+      if(game.state===STATE_PLAY) game.state=STATE_PAUSE;
+      else if(game.state===STATE_PAUSE) game.state=STATE_PLAY;
+    }
+  });
 
   return {
     game,
