@@ -3,827 +3,116 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
-  <title>TETRIS • Web</title>
-  <style>
-    :root{
-      --bg:#0f1220;
-      --panel: rgba(255,255,255,.06);
-      --stroke: rgba(255,255,255,.14);
-      --text: rgba(255,255,255,.92);
-      --muted: rgba(255,255,255,.65);
-      --btn: rgba(255,255,255,.10);
-      --btn2: rgba(255,255,255,.14);
-      --shadow: rgba(0,0,0,.35);
-    }
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0;
-      background: radial-gradient(900px 500px at 20% 0%, rgba(120,140,255,.18), transparent 60%),
-                  radial-gradient(900px 500px at 80% 20%, rgba(255,180,90,.14), transparent 60%),
-                  linear-gradient(180deg, #0b0e18, var(--bg));
-      color:var(--text);
-      font-family: system-ui,-apple-system,"Pretendard","Malgun Gothic",Segoe UI,Roboto,Arial,sans-serif;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding:16px;
-    }
-    .app{
-      width:min(980px, 100%);
-      display:grid;
-      grid-template-columns: 1fr 320px;
-      gap:14px;
-    }
-    @media (max-width: 860px){
-      .app{grid-template-columns:1fr; max-width:540px}
-    }
-    .card{
-      background: var(--panel);
-      border:1px solid var(--stroke);
-      border-radius:18px;
-      box-shadow: 0 20px 60px var(--shadow);
-      backdrop-filter: blur(10px);
-    }
-    .boardWrap{
-      padding:14px;
-      display:flex;
-      gap:14px;
-      align-items:flex-start;
-      justify-content:center;
-    }
-    canvas{
-      width: min(420px, 100%);
-      height: auto;
-      image-rendering: pixelated;
-      border-radius:14px;
-      border:1px solid var(--stroke);
-      background: rgba(0,0,0,.25);
-    }
-    .side{
-      padding:14px;
-      display:flex;
-      flex-direction:column;
-      gap:12px;
-    }
-    .title{
-      display:flex; align-items:baseline; justify-content:space-between;
-      padding:14px 16px;
-    }
-    .title h1{
-      font-size:18px; margin:0; letter-spacing:.4px;
-    }
-    .title small{color:var(--muted)}
-    .stats{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap:10px;
-      padding: 0 14px 14px;
-    }
-    .stat{
-      padding:12px;
-      border-radius:14px;
-      background: rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.10);
-    }
-    .stat .k{font-size:12px; color:var(--muted)}
-    .stat .v{font-size:18px; font-weight:700; margin-top:6px}
-    .row{
-      display:flex; gap:10px; align-items:stretch;
-      padding: 0 14px 14px;
-    }
-    .nextBox{
-      flex:1;
-      padding:12px;
-      border-radius:14px;
-      background: rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.10);
-    }
-    .nextBox .k{font-size:12px; color:var(--muted); margin-bottom:8px}
-    #next{
-      width:100%;
-      aspect-ratio: 1/1;
-      border-radius:12px;
-      border:1px solid rgba(255,255,255,.10);
-      background: rgba(0,0,0,.22);
-      image-rendering: pixelated;
-    }
-    .btns{
-      padding: 0 14px 14px;
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap:10px;
-    }
-    button{
-      appearance:none; border:1px solid rgba(255,255,255,.14);
-      background: var(--btn);
-      color: var(--text);
-      padding:12px 12px;
-      border-radius:14px;
-      font-weight:700;
-      cursor:pointer;
-      transition: transform .06s ease, background .2s ease;
-      user-select:none;
-      -webkit-tap-highlight-color: transparent;
-    }
-    button:active{transform: translateY(1px); background: var(--btn2)}
-    .hint{
-      padding: 0 14px 14px;
-      color:var(--muted);
-      font-size:12px;
-      line-height:1.5;
-    }
-    .mobilePad{
-      padding:14px;
-      display:grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap:10px;
-    }
-    .mobilePad .wide{grid-column: span 3}
-    .badge{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding:6px 10px;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,.14);
-      background: rgba(255,255,255,.06);
-      font-size:12px;
-      color:var(--muted);
-    }
-    .overlay{
-      position:absolute;
-      inset:0;
-      display:none;
-      align-items:center;
-      justify-content:center;
-      text-align:center;
-      padding:20px;
-      border-radius:18px;
-      background: rgba(0,0,0,.42);
-      backdrop-filter: blur(6px);
-    }
-    .overlay.show{display:flex}
-    .overlay .box{
-      max-width: 420px;
-      width:100%;
-      background: rgba(255,255,255,.08);
-      border:1px solid rgba(255,255,255,.16);
-      border-radius:18px;
-      padding:18px 16px;
-      box-shadow: 0 30px 80px rgba(0,0,0,.45);
-    }
-    .overlay h2{margin:0 0 8px; font-size:18px}
-    .overlay p{margin:0 0 14px; color:var(--muted); font-size:13px; line-height:1.55}
-    .topBar{
-      padding:14px;
-      display:flex;
-      gap:10px;
-      justify-content:space-between;
-      align-items:center;
-    }
-  </style>
+  <title>TETRIS • Deluxe</title>
+  <link rel="stylesheet" href="./styles.css" />
 </head>
 <body>
   <div class="app">
-    <div class="card" style="position:relative;">
-      <div class="topBar">
-        <div class="badge">🧱 <b>TETRIS</b> <span style="opacity:.65">• Web</span></div>
-        <div class="badge" id="statusBadge">▶ 진행중</div>
-      </div>
-      <div class="boardWrap">
-        <canvas id="game" width="300" height="600" aria-label="tetris board"></canvas>
-      </div>
-
-      <div class="mobilePad card" style="margin:0 14px 14px;">
-        <button id="btnLeft">⬅️ 왼쪽</button>
-        <button id="btnRotate">🔄 회전</button>
-        <button id="btnRight">➡️ 오른쪽</button>
-        <button id="btnDown">⬇️ 아래</button>
-        <button id="btnDrop">💥 드랍</button>
-        <button id="btnPause">⏸︎ 일시정지</button>
-        <button id="btnRestart" class="wide">🔁 재시작</button>
-      </div>
-
-      <div class="overlay" id="overlay">
-        <div class="box">
-          <h2 id="ovTitle">게임 오버</h2>
-          <p id="ovText">재시작을 눌러 다시 시작하세요.</p>
-          <button id="ovRestart" style="width:100%;">🔁 재시작</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="card side">
-      <div class="title">
-        <h1>대시보드</h1>
-        <small>키보드/모바일 지원</small>
-      </div>
-
-      <div class="stats">
-        <div class="stat"><div class="k">점수</div><div class="v" id="score">0</div></div>
-        <div class="stat"><div class="k">레벨</div><div class="v" id="level">1</div></div>
-        <div class="stat"><div class="k">라인</div><div class="v" id="lines">0</div></div>
-        <div class="stat"><div class="k">최고점(로컬)</div><div class="v" id="best">0</div></div>
-      </div>
-
-      <div class="row">
-        <div class="nextBox">
-          <div class="k">다음 블록</div>
-          <canvas id="next" width="200" height="200"></canvas>
+    <header class="topbar card">
+      <div class="brand">
+        <span class="logo">🧱</span>
+        <div>
+          <div class="brandTitle">TETRIS</div>
+          <div class="brandSub">Deluxe Web Edition</div>
         </div>
       </div>
 
-      <div class="btns">
-        <button id="start">▶ 시작</button>
-        <button id="pause">⏸︎ 일시정지</button>
-        <button id="restart">🔁 재시작</button>
-        <button id="mute">🔊 소리: 켬</button>
-      </div>
+      <div class="pill" id="statusPill">대기중</div>
+    </header>
 
-      <div class="hint">
-        <b>조작</b><br/>
-        ← → : 이동 / ↓ : 빠르게 내리기 / ↑ : 회전 / Space : 즉시 드랍 / P : 일시정지<br/>
-        <span style="opacity:.85">팁: 레벨이 오르면 중력이 더 세져서 블록이 성격 급해집니다 😼</span>
-      </div>
-    </div>
+    <main class="grid">
+      <section class="card stage">
+        <div class="stageTop">
+          <div class="pill subtle">조작: ← → ↓ / ↑ 회전 / Space 드랍 / C 홀드 / P 일시정지</div>
+          <div class="pill subtle" id="netPill">Supabase: 연결중…</div>
+        </div>
+
+        <div class="stageBody">
+          <canvas id="game" width="300" height="600" aria-label="tetris board"></canvas>
+
+          <div class="stageSide">
+            <div class="mini cardInner">
+              <div class="miniTitle">NEXT</div>
+              <canvas id="next" width="160" height="160"></canvas>
+            </div>
+
+            <div class="mini cardInner">
+              <div class="miniTitle">HOLD</div>
+              <canvas id="hold" width="160" height="160"></canvas>
+            </div>
+
+            <div class="stats cardInner">
+              <div class="stat">
+                <div class="k">점수</div>
+                <div class="v" id="score">0</div>
+              </div>
+              <div class="stat">
+                <div class="k">레벨</div>
+                <div class="v" id="level">1</div>
+              </div>
+              <div class="stat">
+                <div class="k">라인</div>
+                <div class="v" id="lines">0</div>
+              </div>
+              <div class="stat">
+                <div class="k">최고점(로컬)</div>
+                <div class="v" id="best">0</div>
+              </div>
+            </div>
+
+            <div class="btnRow">
+              <button class="btn" id="btnStart">▶ 시작</button>
+              <button class="btn" id="btnPause">⏸︎ 일시정지</button>
+              <button class="btn" id="btnRestart">🔁 재시작</button>
+            </div>
+
+            <div class="btnRow">
+              <button class="btn ghost" id="btnSound">🔊 사운드: 켬</button>
+              <button class="btn ghost" id="btnShake">✨ 이펙트: 켬</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="mobilePad cardInner">
+          <button class="btn" data-pad="left">⬅️</button>
+          <button class="btn" data-pad="rotate">🔄</button>
+          <button class="btn" data-pad="right">➡️</button>
+          <button class="btn" data-pad="down">⬇️</button>
+          <button class="btn" data-pad="drop">💥</button>
+          <button class="btn" data-pad="hold">🧤 HOLD</button>
+          <button class="btn ghost wide" data-pad="pause">⏸︎</button>
+        </div>
+
+        <div class="overlay" id="overlay">
+          <div class="overlayBox">
+            <div class="overlayTitle" id="ovTitle">게임 오버</div>
+            <div class="overlayText" id="ovText">점수를 랭킹에 등록할 수 있어요.</div>
+
+            <div class="submitRow">
+              <input id="playerName" maxlength="20" placeholder="이름(1~20자)" />
+              <button class="btn" id="btnSubmit">🏆 등록</button>
+            </div>
+
+            <div class="btnRow">
+              <button class="btn" id="btnPlayAgain">🔁 다시하기</button>
+              <button class="btn ghost" id="btnCloseOverlay">닫기</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <aside class="card panel">
+        <div class="panelTitle">🏆 랭킹 Top 20</div>
+        <div class="panelSub" id="lbStatus">불러오는 중…</div>
+        <div class="lb" id="lbList"></div>
+      </aside>
+    </main>
+
+    <footer class="footer">
+      <span class="muted">Made for web. 저장은 Supabase RLS 정책에 의해 안전하게 제한됩니다.</span>
+    </footer>
   </div>
 
-<script>
-(() => {
-  // ===== Canvas setup =====
-  const canvas = document.getElementById("game");
-  const ctx = canvas.getContext("2d");
-  const nextCanvas = document.getElementById("next");
-  const nctx = nextCanvas.getContext("2d");
-
-  // Board: 10x20, each cell is 30px (canvas 300x600)
-  const COLS = 10, ROWS = 20, CELL = 30;
-
-  // UI elements
-  const elScore = document.getElementById("score");
-  const elLevel = document.getElementById("level");
-  const elLines = document.getElementById("lines");
-  const elBest  = document.getElementById("best");
-  const statusBadge = document.getElementById("statusBadge");
-
-  const overlay = document.getElementById("overlay");
-  const ovTitle = document.getElementById("ovTitle");
-  const ovText  = document.getElementById("ovText");
-
-  // Buttons
-  const btnStart = document.getElementById("start");
-  const btnPause = document.getElementById("pause");
-  const btnRestart = document.getElementById("restart");
-  const btnMute = document.getElementById("mute");
-
-  const padLeft = document.getElementById("btnLeft");
-  const padRight = document.getElementById("btnRight");
-  const padDown = document.getElementById("btnDown");
-  const padRotate = document.getElementById("btnRotate");
-  const padDrop = document.getElementById("btnDrop");
-  const padPause = document.getElementById("btnPause");
-  const padRestart = document.getElementById("btnRestart");
-  const ovRestart = document.getElementById("ovRestart");
-
-  // ===== Simple beep sounds (WebAudio) =====
-  let audioOn = true;
-  const AudioCtx = window.AudioContext || window.webkitAudioContext;
-  let actx = null;
-
-  function beep(freq=440, ms=60, type="square", gain=0.035){
-    if(!audioOn) return;
-    try{
-      if(!actx) actx = new AudioCtx();
-      const o = actx.createOscillator();
-      const g = actx.createGain();
-      o.type = type;
-      o.frequency.value = freq;
-      g.gain.value = gain;
-      o.connect(g); g.connect(actx.destination);
-      o.start();
-      setTimeout(()=>{ try{o.stop();}catch(e){} }, ms);
-    }catch(e){}
-  }
-
-  // ===== Tetromino data =====
-  // Using 4x4 matrices
-  const SHAPES = {
-    I: [
-      [0,0,0,0],
-      [1,1,1,1],
-      [0,0,0,0],
-      [0,0,0,0],
-    ],
-    O: [
-      [0,1,1,0],
-      [0,1,1,0],
-      [0,0,0,0],
-      [0,0,0,0],
-    ],
-    T: [
-      [0,1,0,0],
-      [1,1,1,0],
-      [0,0,0,0],
-      [0,0,0,0],
-    ],
-    S: [
-      [0,1,1,0],
-      [1,1,0,0],
-      [0,0,0,0],
-      [0,0,0,0],
-    ],
-    Z: [
-      [1,1,0,0],
-      [0,1,1,0],
-      [0,0,0,0],
-      [0,0,0,0],
-    ],
-    J: [
-      [1,0,0,0],
-      [1,1,1,0],
-      [0,0,0,0],
-      [0,0,0,0],
-    ],
-    L: [
-      [0,0,1,0],
-      [1,1,1,0],
-      [0,0,0,0],
-      [0,0,0,0],
-    ],
-  };
-
-  // Nice palette (not too neon)
-  const COLORS = {
-    I: "#78a6ff",
-    O: "#ffd36b",
-    T: "#b38cff",
-    S: "#7cf0c5",
-    Z: "#ff7e7e",
-    J: "#7aa6a6",
-    L: "#ffb66b",
-    GHOST: "rgba(255,255,255,.18)",
-    GRID: "rgba(255,255,255,.08)",
-  };
-
-  function cloneMatrix(m){ return m.map(r => r.slice()); }
-
-  function rotateMatrix(m){
-    // rotate 4x4 clockwise
-    const res = Array.from({length:4}, () => Array(4).fill(0));
-    for(let y=0;y<4;y++){
-      for(let x=0;x<4;x++){
-        res[x][3-y] = m[y][x];
-      }
-    }
-    return res;
-  }
-
-  // 7-bag randomizer
-  let bag = [];
-  function refillBag(){
-    bag = ["I","O","T","S","Z","J","L"];
-    for(let i=bag.length-1;i>0;i--){
-      const j = (Math.random()*(i+1))|0;
-      [bag[i], bag[j]] = [bag[j], bag[i]];
-    }
-  }
-  function nextType(){
-    if(bag.length === 0) refillBag();
-    return bag.pop();
-  }
-
-  // ===== Game state =====
-  let board, current, next, score, level, lines, best;
-  let dropCounter = 0;
-  let dropInterval = 800; // ms, modified by level
-  let lastTime = 0;
-  let running = false;
-  let paused = false;
-  let gameOver = false;
-
-  function emptyBoard(){
-    return Array.from({length:ROWS}, () => Array(COLS).fill(null));
-  }
-
-  function spawnPiece(type){
-    const mat = cloneMatrix(SHAPES[type]);
-    const x = (COLS/2|0) - 2;
-    const y = -1; // start slightly above
-    return { type, mat, x, y };
-  }
-
-  function reset(){
-    board = emptyBoard();
-    score = 0; level = 1; lines = 0;
-    dropInterval = 800;
-    refillBag();
-    current = spawnPiece(nextType());
-    next = spawnPiece(nextType());
-    running = false;
-    paused = false;
-    gameOver = false;
-    dropCounter = 0;
-    lastTime = 0;
-    overlay.classList.remove("show");
-    updateUI();
-    drawAll();
-    statusBadge.textContent = "⏸ 대기중";
-  }
-
-  function start(){
-    if(gameOver) return;
-    if(!running){
-      running = true;
-      paused = false;
-      statusBadge.textContent = "▶ 진행중";
-      requestAnimationFrame(update);
-    }
-  }
-
-  function setPaused(v){
-    if(!running && !v) return;
-    paused = v;
-    statusBadge.textContent = paused ? "⏸ 일시정지" : "▶ 진행중";
-    if(!paused && running){
-      lastTime = performance.now();
-      requestAnimationFrame(update);
-    }
-  }
-
-  function endGame(){
-    gameOver = true;
-    running = false;
-    paused = false;
-    statusBadge.textContent = "💀 게임오버";
-    beep(140, 120, "sawtooth", .05);
-    if(score > best){
-      best = score;
-      localStorage.setItem("tetris_best", String(best));
-    }
-    updateUI();
-    ovTitle.textContent = "게임 오버";
-    ovText.textContent = `점수 ${score}점 • 라인 ${lines}줄 • 레벨 ${level}`;
-    overlay.classList.add("show");
-  }
-
-  function updateUI(){
-    elScore.textContent = String(score);
-    elLevel.textContent = String(level);
-    elLines.textContent = String(lines);
-    elBest.textContent = String(best);
-  }
-
-  function loadBest(){
-    best = Number(localStorage.getItem("tetris_best") || "0");
-    elBest.textContent = String(best);
-  }
-
-  // ===== Collision & merge =====
-  function collides(piece, offX=0, offY=0, testMat=null){
-    const mat = testMat || piece.mat;
-    const px = piece.x + offX;
-    const py = piece.y + offY;
-
-    for(let y=0;y<4;y++){
-      for(let x=0;x<4;x++){
-        if(!mat[y][x]) continue;
-        const bx = px + x;
-        const by = py + y;
-
-        // out of bounds bottom/left/right
-        if(bx < 0 || bx >= COLS || by >= ROWS) return true;
-
-        // above top is allowed
-        if(by < 0) continue;
-
-        // cell occupied
-        if(board[by][bx]) return true;
-      }
-    }
-    return false;
-  }
-
-  function merge(piece){
-    for(let y=0;y<4;y++){
-      for(let x=0;x<4;x++){
-        if(!piece.mat[y][x]) continue;
-        const bx = piece.x + x;
-        const by = piece.y + y;
-        if(by < 0){
-          // merge above top => game over
-          endGame();
-          return;
-        }
-        board[by][bx] = piece.type;
-      }
-    }
-  }
-
-  function clearLines(){
-    let cleared = 0;
-    for(let y=ROWS-1; y>=0; y--){
-      if(board[y].every(cell => cell !== null)){
-        board.splice(y,1);
-        board.unshift(Array(COLS).fill(null));
-        cleared++;
-        y++; // re-check same row index after shift
-      }
-    }
-    if(cleared > 0){
-      // scoring (classic-ish)
-      const table = [0, 100, 300, 500, 800];
-      score += (table[cleared] || 0) * level;
-      lines += cleared;
-
-      // level up each 10 lines
-      const newLevel = (lines / 10 | 0) + 1;
-      if(newLevel !== level){
-        level = newLevel;
-        // faster drop (clamp)
-        dropInterval = Math.max(90, 800 - (level-1)*60);
-        beep(880, 70, "triangle", .04);
-      }else{
-        beep(520, 40, "square", .03);
-      }
-      updateUI();
-    }
-  }
-
-  function hardDrop(){
-    if(!running || paused || gameOver) return;
-    let d = 0;
-    while(!collides(current, 0, d+1)) d++;
-    current.y += d;
-    score += 2 * d; // reward
-    beep(620, 40, "square", .03);
-    lockPiece();
-  }
-
-  function lockPiece(){
-    merge(current);
-    if(gameOver) return;
-    clearLines();
-    current = next;
-    next = spawnPiece(nextType());
-    // spawn collision => game over
-    if(collides(current,0,0)){
-      endGame();
-      return;
-    }
-    drawNext();
-  }
-
-  function softDrop(){
-    if(!running || paused || gameOver) return;
-    if(!collides(current, 0, 1)){
-      current.y++;
-      score += 1;
-      updateUI();
-    }else{
-      lockPiece();
-    }
-  }
-
-  function move(dx){
-    if(!running || paused || gameOver) return;
-    if(!collides(current, dx, 0)){
-      current.x += dx;
-      beep(220, 18, "square", .02);
-    }
-  }
-
-  function rotate(){
-    if(!running || paused || gameOver) return;
-    const rotated = rotateMatrix(current.mat);
-
-    // simple wall-kicks
-    const kicks = [0, -1, 1, -2, 2];
-    for(const k of kicks){
-      if(!collides(current, k, 0, rotated)){
-        current.mat = rotated;
-        current.x += k;
-        beep(330, 26, "triangle", .03);
-        return;
-      }
-    }
-  }
-
-  // ===== Drawing =====
-  function drawCell(x,y,color,alpha=1){
-    ctx.globalAlpha = alpha;
-    ctx.fillStyle = color;
-    ctx.fillRect(x*CELL, y*CELL, CELL, CELL);
-    // subtle inner highlight
-    ctx.globalAlpha = alpha;
-    ctx.strokeStyle = "rgba(255,255,255,.10)";
-    ctx.strokeRect(x*CELL + 1, y*CELL + 1, CELL-2, CELL-2);
-    ctx.globalAlpha = 1;
-  }
-
-  function drawGrid(){
-    ctx.strokeStyle = COLORS.GRID;
-    for(let x=0;x<=COLS;x++){
-      ctx.beginPath();
-      ctx.moveTo(x*CELL, 0);
-      ctx.lineTo(x*CELL, ROWS*CELL);
-      ctx.stroke();
-    }
-    for(let y=0;y<=ROWS;y++){
-      ctx.beginPath();
-      ctx.moveTo(0, y*CELL);
-      ctx.lineTo(COLS*CELL, y*CELL);
-      ctx.stroke();
-    }
-  }
-
-  function drawBoard(){
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    drawGrid();
-    for(let y=0;y<ROWS;y++){
-      for(let x=0;x<COLS;x++){
-        const t = board[y][x];
-        if(t) drawCell(x,y,COLORS[t], 0.95);
-      }
-    }
-  }
-
-  function ghostDropDistance(){
-    let d = 0;
-    while(!collides(current,0,d+1)) d++;
-    return d;
-  }
-
-  function drawPiece(piece, alpha=1, ghost=false){
-    const mat = piece.mat;
-    for(let y=0;y<4;y++){
-      for(let x=0;x<4;x++){
-        if(!mat[y][x]) continue;
-        const bx = piece.x + x;
-        const by = piece.y + y;
-        if(by < 0) continue;
-        const color = ghost ? COLORS.GHOST : COLORS[piece.type];
-        drawCell(bx, by, color, alpha);
-      }
-    }
-  }
-
-  function drawAll(){
-    drawBoard();
-    if(!gameOver){
-      // ghost
-      const d = ghostDropDistance();
-      const g = { ...current, y: current.y + d };
-      drawPiece(g, 1, true);
-      drawPiece(current, 0.98, false);
-    }
-    if(paused){
-      ctx.fillStyle = "rgba(0,0,0,.40)";
-      ctx.fillRect(0,0,canvas.width,canvas.height);
-      ctx.fillStyle = "rgba(255,255,255,.92)";
-      ctx.font = "bold 22px system-ui, sans-serif";
-      ctx.textAlign = "center";
-      ctx.fillText("일시정지", canvas.width/2, canvas.height/2 - 6);
-      ctx.fillStyle = "rgba(255,255,255,.65)";
-      ctx.font = "14px system-ui, sans-serif";
-      ctx.fillText("P 또는 버튼으로 재개", canvas.width/2, canvas.height/2 + 18);
-    }
-  }
-
-  function drawNext(){
-    nctx.clearRect(0,0,nextCanvas.width,nextCanvas.height);
-    // background grid
-    const size = 5;
-    const cell = nextCanvas.width / size;
-    nctx.strokeStyle = "rgba(255,255,255,.08)";
-    for(let i=0;i<=size;i++){
-      nctx.beginPath(); nctx.moveTo(i*cell,0); nctx.lineTo(i*cell,nextCanvas.height); nctx.stroke();
-      nctx.beginPath(); nctx.moveTo(0,i*cell); nctx.lineTo(nextCanvas.width,i*cell); nctx.stroke();
-    }
-
-    const mat = next.mat;
-    // center in 5x5 area
-    const offX = 1, offY = 1;
-    for(let y=0;y<4;y++){
-      for(let x=0;x<4;x++){
-        if(!mat[y][x]) continue;
-        nctx.fillStyle = COLORS[next.type];
-        nctx.globalAlpha = 0.95;
-        nctx.fillRect((x+offX)*cell, (y+offY)*cell, cell, cell);
-        nctx.globalAlpha = 1;
-        nctx.strokeStyle = "rgba(255,255,255,.12)";
-        nctx.strokeRect((x+offX)*cell+1, (y+offY)*cell+1, cell-2, cell-2);
-      }
-    }
-  }
-
-  // ===== Main loop =====
-  function update(time=0){
-    if(!running || paused || gameOver) return;
-    const delta = time - lastTime;
-    lastTime = time;
-    dropCounter += delta;
-
-    if(dropCounter > dropInterval){
-      // auto drop
-      if(!collides(current,0,1)){
-        current.y++;
-      }else{
-        lockPiece();
-      }
-      dropCounter = 0;
-    }
-
-    drawAll();
-    requestAnimationFrame(update);
-  }
-
-  // ===== Input handling =====
-  const keys = new Set();
-  window.addEventListener("keydown", (e) => {
-    const k = e.key;
-    if(["ArrowLeft","ArrowRight","ArrowDown","ArrowUp"," ","p","P"].includes(k)) e.preventDefault();
-
-    if(k === "p" || k === "P"){
-      if(!running) return;
-      setPaused(!paused);
-      beep(260, 40, "square", .03);
-      return;
-    }
-    if(!running) return;
-
-    if(k === "ArrowLeft") move(-1);
-    if(k === "ArrowRight") move(1);
-    if(k === "ArrowUp") rotate();
-    if(k === "ArrowDown") softDrop();
-    if(k === " ") hardDrop();
-  }, {passive:false});
-
-  // Touch helpers
-  function bindHold(btn, onTap, onHold){
-    let t = null;
-    const start = (e) => {
-      e.preventDefault();
-      onTap();
-      t = setInterval(() => onHold?.(), 80);
-    };
-    const end = (e) => {
-      e.preventDefault();
-      if(t) clearInterval(t);
-      t = null;
-    };
-    btn.addEventListener("touchstart", start, {passive:false});
-    btn.addEventListener("touchend", end, {passive:false});
-    btn.addEventListener("touchcancel", end, {passive:false});
-    // mouse support too
-    btn.addEventListener("mousedown", (e)=>{ e.preventDefault(); onTap(); t=setInterval(()=>onHold?.(), 80); });
-    window.addEventListener("mouseup", ()=>{ if(t) clearInterval(t); t=null; });
-  }
-
-  bindHold(padLeft,  ()=>move(-1), ()=>move(-1));
-  bindHold(padRight, ()=>move(1),  ()=>move(1));
-  bindHold(padDown,  ()=>softDrop(), ()=>softDrop());
-  padRotate.addEventListener("click", ()=>rotate());
-  padDrop.addEventListener("click", ()=>hardDrop());
-  padPause.addEventListener("click", ()=>{
-    if(!running){ start(); return; }
-    setPaused(!paused);
-    beep(260, 40, "square", .03);
-  });
-  padRestart.addEventListener("click", ()=>{ reset(); start(); });
-
-  // Side buttons
-  btnStart.addEventListener("click", ()=>{ start(); beep(520,60,"triangle",.03); });
-  btnPause.addEventListener("click", ()=>{
-    if(!running) return;
-    setPaused(!paused);
-    beep(260, 40, "square", .03);
-  });
-  btnRestart.addEventListener("click", ()=>{ reset(); start(); beep(520,60,"triangle",.03); });
-  ovRestart.addEventListener("click", ()=>{ reset(); start(); beep(520,60,"triangle",.03); });
-
-  btnMute.addEventListener("click", async ()=>{
-    audioOn = !audioOn;
-    btnMute.textContent = audioOn ? "🔊 소리: 켬" : "🔇 소리: 끔";
-    statusBadge.textContent = paused ? "⏸ 일시정지" : (running ? "▶ 진행중" : "⏸ 대기중");
-    if(audioOn){
-      beep(660, 50, "triangle", .03);
-    }
-  });
-
-  // Resume AudioContext on first interaction (mobile autoplay policies)
-  ["pointerdown","touchstart","keydown"].forEach(ev=>{
-    window.addEventListener(ev, () => {
-      if(actx && actx.state === "suspended") actx.resume().catch(()=>{});
-    }, {once:true, passive:true});
-  });
-
-  // Init
-  loadBest();
-  reset();
-  drawNext();
-  drawAll();
-})();
-</script>
+  <script type="module" src="./js/app.js"></script>
 </body>
 </html>
