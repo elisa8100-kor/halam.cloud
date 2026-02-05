@@ -108,8 +108,9 @@ submitNameBtn.addEventListener('click', async ()=>{
 
   await refreshLeaderboard(showToast);
 }catch(e){
+  console.error(e);
   showToast("저장 중 문제가 발생했습니다.");
-}
+  }
 
   }finally{
     submitting = false;
