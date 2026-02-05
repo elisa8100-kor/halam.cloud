@@ -1,35 +1,422 @@
-<form id="lbForm">
-  <input id="name" placeholder="이름" required />
-  <input id="score" type="number" placeholder="점수" required />
-  <input id="max_combo" type="number" placeholder="최대콤보" required />
-  <button type="submit">저장</button>
-</form>
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <title>Leaderboard Admin</title>
+  <style>
+    :root{
+      --bg:#121621; --glass: rgba(255,255,255,.06); --ink: rgba(0,0,0,.35);
+      --btn:#273150; --btnBorder: rgba(255,255,255,.15);
+      --hud:#eaeaf0; --accent:#ffd974; --danger:#5a2630;
+    }
+    html,body{
+      margin:0; height:100%;
+      background:linear-gradient(180deg,#0f1320 0%, #121621 60%, #0f1320 100%);
+      color:var(--hud);
+      font-family:"Pretendard","Malgun Gothic","Apple SD Gothic Neo",system-ui,-apple-system,Segoe UI,Roboto,"Noto Sans KR",Arial,sans-serif;
+    }
+    .wrap{
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+    .panel{
+      background:var(--glass);
+      border:1px solid rgba(255,255,255,.07);
+      border-radius:16px;
+      padding:16px;
+      box-shadow:0 12px 30px var(--ink);
+    }
+    h1{ margin: 0 0 14px; font-size: 20px; }
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    @media (max-width: 860px){
+      .grid{ grid-template-columns: 1fr; }
+    }
+    .row{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    label{
+      font-size: 12px;
+      opacity: .9;
+      display:block;
+      margin-bottom: 6px;
+    }
+    input{
+      width:100%;
+      background:#0f1526;
+      border:1px solid rgba(255,255,255,.15);
+      color:#eef3ff;
+      padding:10px 12px;
+      border-radius:10px;
+      outline:none;
+      box-sizing:border-box;
+    }
+    button{
+      background:var(--btn);
+      color:#eaf1ff;
+      border:1px solid var(--btnBorder);
+      padding:10px 14px;
+      border-radius:10px;
+      cursor:pointer;
+      white-space:nowrap;
+    }
+    button:hover{ filter:brightness(1.05); }
+    button:disabled{ opacity:.55; cursor:not-allowed; }
+    .danger{ background: var(--danger); border-color: rgba(255,255,255,.12); }
+    .accent{ background: rgba(39,49,80,.85); border-color: rgba(255,255,255,.15); }
+    .muted{ opacity:.75; font-size:12px; line-height:1.5; }
+    .spacer{ height: 12px; }
 
-<script type="module">
-  import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-  const supabase = createClient(
-    "https://oykepnxnbyltcvcqnfbe.supabase.co",
-    "sb_publishable_85W1hHMVmhILGBbrX-l4wg_qmLCn987"
-  );
-
-  document.getElementById("lbForm").addEventListener("submit", async (e) => {
-    e.preventDefault();
-
-    const name = document.getElementById("name").value.trim();
-    const score = Number(document.getElementById("score").value);
-    const max_combo = Number(document.getElementById("max_combo").value);
-
-    const { error } = await supabase
-      .from("leaderboard")
-      .insert([{ name, score, max_combo }]);
-
-    if (error) {
-      alert("저장 실패: " + error.message);
-      return;
+    table{
+      width:100%;
+      border-collapse:collapse;
+      font-size:14px;
+      margin-top: 10px;
+      overflow:hidden;
+      border-radius: 12px;
+    }
+    th,td{
+      padding:10px;
+      border-bottom:1px solid rgba(255,255,255,.08);
+      text-align:left;
+      vertical-align: middle;
+    }
+    th{ color:#bcd3ff; font-weight:600; }
+    .tag{
+      display:inline-block;
+      font-size:12px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.10);
     }
 
-    alert("저장 완료!");
-    e.target.reset();
-  });
-</script>
+    .toast{
+      position:fixed; top:12px; left:50%; transform:translateX(-50%);
+      background:#1e2538; border:1px solid rgba(255,255,255,.08);
+      padding:10px 14px; border-radius:10px;
+      box-shadow:0 6px 20px rgba(0,0,0,.35);
+      display:none;
+      max-width:min(720px,92vw);
+      text-align:center;
+      z-index:30;
+    }
+
+    .overlay{
+      position:fixed; inset:0; display:flex; align-items:center; justify-content:center;
+      background:rgba(0,0,0,.55);
+      z-index:50;
+    }
+    .dialog{
+      width:min(460px,92vw);
+      background:#192033; border:1px solid rgba(255,255,255,.12);
+      border-radius:16px; padding:18px;
+      box-shadow:0 18px 60px rgba(0,0,0,.55);
+    }
+    .dialog h3{ margin:0 0 12px; font-size:18px; }
+    .dialog p{ margin:8px 0 12px; font-size:14px; opacity:.92; }
+  </style>
+</head>
+
+<body>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <div class="overlay" id="pwOverlay" role="dialog" aria-modal="true">
+    <div class="dialog">
+      <h3>🔒 관리자 비밀번호</h3>
+      <p>비밀번호가 맞아야 관리자 페이지에 들어갈 수 있어요.</p>
+      <div class="row">
+        <input type="password" id="pwInput" placeholder="비밀번호" autocomplete="off" />
+        <button id="pwSubmit">입장</button>
+      </div>
+      <div class="muted" id="pwMsg" style="margin-top:10px;"></div>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="panel">
+      <h1>🏆 Leaderboard Admin</h1>
+      <div class="muted">
+        - Supabase leaderboard 테이블을 관리합니다.<br>
+        - 컬럼 가정: <span class="tag">id</span> <span class="tag">name</span> <span class="tag">score</span> <span class="tag">max_combo</span> <span class="tag">created_at</span>
+      </div>
+
+      <div class="spacer"></div>
+
+      <div class="grid">
+        <div class="panel" style="box-shadow:none;">
+          <h1 style="font-size:16px;margin:0 0 10px;">➕ 수동 점수 추가</h1>
+          <div class="row">
+            <div style="flex:1;min-width:220px;">
+              <label>닉네임</label>
+              <input id="name" placeholder="예) halam" />
+            </div>
+            <div style="flex:1;min-width:160px;">
+              <label>점수</label>
+              <input id="score" type="number" placeholder="예) 120" />
+            </div>
+            <div style="flex:1;min-width:160px;">
+              <label>최대 콤보</label>
+              <input id="maxCombo" type="number" placeholder="예) 15" />
+            </div>
+          </div>
+
+          <div class="spacer"></div>
+
+          <div class="row">
+            <button id="btnInsert" class="accent">저장</button>
+            <button id="btnRefresh">새로고침</button>
+            <button id="btnLogout" class="danger">로그아웃</button>
+          </div>
+
+          <div class="spacer"></div>
+          <div class="muted">
+            * 이 페이지는 테스트/관리 용도입니다. 운영 공개는 권장하지 않아요.
+          </div>
+        </div>
+
+        <div class="panel" style="box-shadow:none;">
+          <h1 style="font-size:16px;margin:0 0 10px;">🧹 관리</h1>
+          <div class="muted">
+            - 삭제는 되돌릴 수 없습니다.<br>
+            - “전체 삭제”는 진짜 마지막 수단으로만.
+          </div>
+          <div class="spacer"></div>
+          <div class="row">
+            <button id="btnDeleteAll" class="danger">전체 삭제</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="spacer"></div>
+
+      <div class="panel" style="box-shadow:none;">
+        <h1 style="font-size:16px;margin:0 0 10px;">📋 최근 Top 20</h1>
+        <table>
+          <thead>
+            <tr>
+              <th style="width:60px;">#</th>
+              <th>닉네임</th>
+              <th style="width:110px;">점수</th>
+              <th style="width:110px;">최대 콤보</th>
+              <th style="width:140px;">날짜</th>
+              <th style="width:110px;">삭제</th>
+            </tr>
+          </thead>
+          <tbody id="rows">
+            <tr><td colspan="6">불러오는 중…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+    const SUPABASE_URL = "https://oykepnxnbyltcvcqnfbe.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_85W1hHMVmhILGBbrX-l4wg_qmLCn987";
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const ACCESS_PASSWORD = "halam0202";
+    const ACCESS_KEY = "wam_admin_access_ok_v1";
+
+    const toastEl = document.getElementById("toast");
+    function toast(msg){
+      toastEl.textContent = msg;
+      toastEl.style.display = "block";
+      clearTimeout(toast._t);
+      toast._t = setTimeout(()=> toastEl.style.display = "none", 1800);
+    }
+
+    const pwOverlay = document.getElementById("pwOverlay");
+    const pwInput = document.getElementById("pwInput");
+    const pwSubmit = document.getElementById("pwSubmit");
+    const pwMsg = document.getElementById("pwMsg");
+
+    function showPw(msg=""){
+      pwMsg.textContent = msg;
+      pwOverlay.style.display = "flex";
+      pwInput.value = "";
+      pwInput.focus();
+    }
+
+    function hidePw(){
+      pwOverlay.style.display = "none";
+    }
+
+    function unlock(){
+      localStorage.setItem(ACCESS_KEY, "1");
+      hidePw();
+      loadRows();
+    }
+
+    function lock(){
+      localStorage.removeItem(ACCESS_KEY);
+      showPw("다시 로그인해주세요.");
+    }
+
+    if(localStorage.getItem(ACCESS_KEY) === "1"){
+      hidePw();
+    } else {
+      showPw();
+    }
+
+    pwSubmit.addEventListener("click", ()=>{
+      const v = pwInput.value.trim();
+      if(v === ACCESS_PASSWORD){
+        unlock();
+      } else {
+        showPw("비밀번호가 틀렸습니다.");
+      }
+    });
+
+    pwInput.addEventListener("keydown", (e)=>{
+      if(e.key === "Enter") pwSubmit.click();
+    });
+
+    const rowsEl = document.getElementById("rows");
+
+    function fmtDate(d){
+      try{ return new Date(d).toLocaleDateString("ko-KR"); }catch{ return "-"; }
+    }
+
+    async function loadRows(){
+      if(localStorage.getItem(ACCESS_KEY) !== "1") return;
+
+      rowsEl.innerHTML = `<tr><td colspan="6">불러오는 중…</td></tr>`;
+
+      const { data, error } = await supabase
+        .from("leaderboard")
+        .select("id,name,score,max_combo,created_at")
+        .order("score", { ascending: false })
+        .order("max_combo", { ascending: false })
+        .order("created_at", { ascending: true })
+        .limit(20);
+
+      if(error){
+        rowsEl.innerHTML = `<tr><td colspan="6">불러오기 실패: ${error.message}</td></tr>`;
+        return;
+      }
+
+      if(!data || data.length === 0){
+        rowsEl.innerHTML = `<tr><td colspan="6">데이터가 없습니다.</td></tr>`;
+        return;
+      }
+
+      rowsEl.innerHTML = data.map((r, i)=>`
+        <tr>
+          <td>${i+1}</td>
+          <td>${String(r.name ?? "")}</td>
+          <td>${Number(r.score ?? 0)}</td>
+          <td>${Number(r.max_combo ?? 0)}</td>
+          <td>${fmtDate(r.created_at)}</td>
+          <td><button class="danger" data-del="${r.id}">삭제</button></td>
+        </tr>
+      `).join("");
+
+      rowsEl.querySelectorAll("[data-del]").forEach(btn=>{
+        btn.addEventListener("click", async ()=>{
+          const id = btn.getAttribute("data-del");
+          if(!confirm("정말 삭제할까요?")) return;
+
+          const { error: delErr } = await supabase
+            .from("leaderboard")
+            .delete()
+            .eq("id", id);
+
+          if(delErr){
+            toast("삭제 실패: " + delErr.message);
+            return;
+          }
+
+          toast("삭제 완료");
+          loadRows();
+        });
+      });
+    }
+
+    document.getElementById("btnRefresh").addEventListener("click", loadRows);
+
+    document.getElementById("btnLogout").addEventListener("click", ()=>{
+      localStorage.removeItem(ACCESS_KEY);
+      showPw("로그아웃 되었습니다.");
+    });
+
+    document.getElementById("btnInsert").addEventListener("click", async ()=>{
+      if(localStorage.getItem(ACCESS_KEY) !== "1"){
+        showPw("비밀번호를 입력해주세요.");
+        return;
+      }
+
+      const name = document.getElementById("name").value.trim();
+      const score = Number(document.getElementById("score").value);
+      const max_combo = Number(document.getElementById("maxCombo").value);
+
+      if(!name || name.length < 2 || name.length > 12){
+        toast("닉네임은 2~12자로 입력해주세요.");
+        return;
+      }
+      if(!Number.isFinite(score) || score < 0){
+        toast("점수는 0 이상의 숫자여야 해요.");
+        return;
+      }
+      if(!Number.isFinite(max_combo) || max_combo < 0){
+        toast("최대 콤보는 0 이상의 숫자여야 해요.");
+        return;
+      }
+
+      const { error } = await supabase
+        .from("leaderboard")
+        .insert([{ name, score, max_combo }]);
+
+      if(error){
+        toast("저장 실패: " + error.message);
+        return;
+      }
+
+      toast("저장 완료!");
+      document.getElementById("name").value = "";
+      document.getElementById("score").value = "";
+      document.getElementById("maxCombo").value = "";
+      loadRows();
+    });
+
+    document.getElementById("btnDeleteAll").addEventListener("click", async ()=>{
+      if(localStorage.getItem(ACCESS_KEY) !== "1"){
+        showPw("비밀번호를 입력해주세요.");
+        return;
+      }
+
+      const phrase = prompt("전체 삭제하려면 'DELETE ALL' 을 정확히 입력하세요.");
+      if(phrase !== "DELETE ALL") return;
+
+      const { error } = await supabase
+        .from("leaderboard")
+        .delete()
+        .neq("id", "00000000-0000-0000-0000-000000000000");
+
+      if(error){
+        toast("전체 삭제 실패: " + error.message);
+        return;
+      }
+
+      toast("전체 삭제 완료");
+      loadRows();
+    });
+
+    if(localStorage.getItem(ACCESS_KEY) === "1"){
+      loadRows();
+    }
+  </script>
+</body>
+</html>
