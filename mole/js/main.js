@@ -1,4 +1,4 @@
-import { createGame, STATE_MENU, STATE_PLAY, STATE_GAMEOVER } from "./game.js";
+import { createGame, STATE_GAMEOVER } from "./game.js";
 import {
   refreshLeaderboard,
   qualifiesTop10,
@@ -8,8 +8,6 @@ import {
 } from "./leaderboard.js";
 
 const canvas = document.getElementById("game");
-const { game, setOnGameOver } = createGame(canvas);
-
 const submitNameBtn = document.getElementById("submitName");
 const cancelNameBtn = document.getElementById("cancelName");
 const nicknameInput = document.getElementById("nickname");
@@ -22,31 +20,42 @@ function showToast(msg){
   setTimeout(()=>toast.style.display="none", 1500);
 }
 
+const { game, setOnGameOver } = createGame(canvas);
+
 let pendingScore = null;
 let submitting = false;
 
 setOnGameOver(async (score, maxCombo)=>{
-  const result = await qualifiesTop10(score, maxCombo);
-  if(result.qualifies){
-    pendingScore = { score, maxCombo };
-    nicknameInput.value = "";
-    nameOverlay.style.display = "flex";
-  }else{
-    showToast("Top 10에 들지 못했습니다.");
+  try{
+    const result = await qualifiesTop10(score, maxCombo);
+
+    if(result.qualifies){
+      pendingScore = { score, maxCombo };
+      nicknameInput.value = "";
+      nameOverlay.style.display = "flex";
+    }else{
+      showToast("Top 10에 들지 못했습니다.");
+    }
+
+    await refreshLeaderboard(showToast);
+  }catch(e){
+    console.error(e);
+    showToast("랭킹 처리 오류");
   }
-  refreshLeaderboard(showToast);
 });
 
 submitNameBtn.addEventListener("click", async ()=>{
-  if(submitting) return;
+  if(submitting || !pendingScore) return;
 
   const name = normalizeNickname(nicknameInput.value);
+
   if(!validateNickname(name)){
     showToast("닉네임 형식 오류");
     return;
   }
 
   submitting = true;
+
   try{
     await saveScore(name, pendingScore.score, pendingScore.maxCombo);
     pendingScore = null;
