@@ -102,15 +102,12 @@ export function validateNickname(name){
 }
 
 export async function saveScore(name, score, maxCombo){
-  await supabaseFetch(
-    "leaderboard?select=id",
-    {
-      method: "POST",
-      body: {
-        name,
-        score: Number(score) || 0,
-        max_combo: Number(maxCombo) || 0
-      }
+  await supabaseFetch("leaderboard", {
+    method: "POST",
+    body: {
+      name,
+      score: Number(score) || 0,
+      max_combo: Number(maxCombo) || 0
     }
-  );
+  });
 }
