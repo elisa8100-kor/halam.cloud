@@ -102,14 +102,15 @@ submitNameBtn.addEventListener('click', async ()=>{
   try{
   await saveScore(name, pendingScore.score, pendingScore.maxCombo);
 
-  pendingScore = null;   // ← 이 줄 중요
+  pendingScore = null;
   nameOverlay.style.display='none';
   showToast("리더보드에 저장 완료했습니다.");
 
   await refreshLeaderboard(showToast);
+}catch(e){
+  showToast("저장 중 문제가 발생했습니다.");
 }
-  }catch{
-    showToast("저장 중 문제가 발생했습니다.");
+
   }finally{
     submitting = false;
     submitNameBtn.disabled = false;
