@@ -16,6 +16,48 @@ function showToast(msg){
 }
 window.__showToast = showToast;
 
+const ACCESS_PASSWORD = "halam0202";
+const ACCESS_KEY = "wam_access_ok_v1";
+
+const pwOverlay = document.getElementById("pwOverlay");
+const pwInput = document.getElementById("pwInput");
+const pwSubmit = document.getElementById("pwSubmit");
+const pwMsg = document.getElementById("pwMsg");
+
+async function unlock(){
+  localStorage.setItem(ACCESS_KEY, "1");
+  pwOverlay.style.display = "none";
+  await refreshLeaderboard(showToast);
+}
+
+function lockMsg(msg){
+  pwMsg.textContent = msg;
+}
+
+const already = localStorage.getItem(ACCESS_KEY) === "1";
+if(already){
+  pwOverlay.style.display = "none";
+  refreshLeaderboard(showToast);
+} else {
+  pwOverlay.style.display = "flex";
+  pwInput.focus();
+}
+
+pwSubmit.addEventListener("click", ()=>{
+  const v = pwInput.value.trim();
+  if(v === ACCESS_PASSWORD){
+    unlock();
+  } else {
+    lockMsg("비밀번호가 틀렸습니다.");
+    pwInput.value = "";
+    pwInput.focus();
+  }
+});
+
+pwInput.addEventListener("keydown", (e)=>{
+  if(e.key === "Enter") pwSubmit.click();
+});
+
 const canvas = document.getElementById('game');
 const { game, setTopHint, setOnGameOver } = createGame(canvas);
 
@@ -57,6 +99,10 @@ let pendingScore = null;
 let submitting = false;
 
 async function probeAndMaybeAskName(score, maxCombo){
+  if(localStorage.getItem(ACCESS_KEY) !== "1"){
+    return;
+  }
+
   try{
     const result = await qualifiesTop10(score, maxCombo);
 
@@ -103,13 +149,11 @@ submitNameBtn.addEventListener('click', async ()=>{
 
   try{
     await saveScore(name, pendingScore.score, pendingScore.maxCombo);
-
     nameOverlay.style.display='none';
     showToast("리더보드에 저장 완료했습니다.");
     pendingScore = null;
-
     await refreshLeaderboard(showToast);
-  }catch(e){
+  }catch{
     showToast("저장 중 문제가 발생했습니다.");
   }finally{
     submitting = false;
@@ -128,5 +172,3 @@ nicknameInput.addEventListener('keydown', (e)=>{
   if(e.key==="Enter") submitNameBtn.click();
   if(e.key==="Escape") cancelNameBtn.click();
 });
-
-await refreshLeaderboard(showToast);
