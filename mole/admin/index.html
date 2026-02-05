@@ -1,0 +1,35 @@
+<form id="lbForm">
+  <input id="name" placeholder="이름" required />
+  <input id="score" type="number" placeholder="점수" required />
+  <input id="max_combo" type="number" placeholder="최대콤보" required />
+  <button type="submit">저장</button>
+</form>
+
+<script type="module">
+  import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+  const supabase = createClient(
+    "https://oykepnxnbyltcvcqnfbe.supabase.co",
+    "sb_publishable_85W1hHMVmhILGBbrX-l4wg_qmLCn987"
+  );
+
+  document.getElementById("lbForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const name = document.getElementById("name").value.trim();
+    const score = Number(document.getElementById("score").value);
+    const max_combo = Number(document.getElementById("max_combo").value);
+
+    const { error } = await supabase
+      .from("leaderboard")
+      .insert([{ name, score, max_combo }]);
+
+    if (error) {
+      alert("저장 실패: " + error.message);
+      return;
+    }
+
+    alert("저장 완료!");
+    e.target.reset();
+  });
+</script>
