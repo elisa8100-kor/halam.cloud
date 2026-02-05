@@ -1,221 +1,125 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ko">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
-  <title>Leaderboard Admin</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Leaderboard 관리자</title>
   <style>
     :root{
-      --bg:#121621; --glass: rgba(255,255,255,.06); --ink: rgba(0,0,0,.35);
-      --btn:#273150; --btnBorder: rgba(255,255,255,.15);
-      --hud:#eaeaf0; --accent:#ffd974; --danger:#5a2630;
+      --bg:#0f1320; --card:#151b2a; --line:rgba(255,255,255,.12);
+      --text:#eaeaf0; --muted:rgba(234,234,240,.72);
+      --btn:#273150; --btn2:#1f263b; --danger:#b83b3b; --ok:#2f7d4e;
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --radius:16px;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, "Pretendard", "Malgun Gothic", sans-serif;
     }
-    html,body{
-      margin:0; height:100%;
-      background:linear-gradient(180deg,#0f1320 0%, #121621 60%, #0f1320 100%);
-      color:var(--hud);
-      font-family:"Pretendard","Malgun Gothic","Apple SD Gothic Neo",system-ui,-apple-system,Segoe UI,Roboto,"Noto Sans KR",Arial,sans-serif;
-    }
-    .wrap{
-      max-width: 980px;
-      margin: 0 auto;
-      padding: 20px;
-      box-sizing: border-box;
-    }
-    .panel{
-      background:var(--glass);
-      border:1px solid rgba(255,255,255,.07);
-      border-radius:16px;
-      padding:16px;
-      box-shadow:0 12px 30px var(--ink);
-    }
-    h1{ margin: 0 0 14px; font-size: 20px; }
-    .grid{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
-    }
-    @media (max-width: 860px){
-      .grid{ grid-template-columns: 1fr; }
-    }
-    .row{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      align-items:center;
-    }
-    label{
-      font-size: 12px;
-      opacity: .9;
-      display:block;
-      margin-bottom: 6px;
-    }
+    html,body{height:100%; margin:0; background:linear-gradient(180deg,#0b0f1a 0%, var(--bg) 70%); color:var(--text);}
+    .wrap{max-width:980px; margin:0 auto; padding:22px 14px 40px;}
+    h1{font-size:20px; margin:0 0 12px;}
+    .card{background:rgba(255,255,255,.04); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); padding:14px;}
+    .row{display:flex; gap:10px; align-items:center; flex-wrap:wrap;}
+    .row > *{flex:1 1 auto;}
+    label{display:block; font-size:12px; color:var(--muted); margin:10px 0 6px;}
     input{
-      width:100%;
-      background:#0f1526;
-      border:1px solid rgba(255,255,255,.15);
-      color:#eef3ff;
-      padding:10px 12px;
-      border-radius:10px;
-      outline:none;
-      box-sizing:border-box;
+      width:100%; padding:12px 12px; border-radius:12px;
+      border:1px solid var(--line); background:rgba(0,0,0,.2);
+      color:var(--text); outline:none;
     }
+    input:focus{border-color:rgba(255,255,255,.26)}
     button{
-      background:var(--btn);
-      color:#eaf1ff;
-      border:1px solid var(--btnBorder);
-      padding:10px 14px;
-      border-radius:10px;
-      cursor:pointer;
-      white-space:nowrap;
+      border:1px solid var(--line); background:var(--btn);
+      color:var(--text); padding:11px 12px; border-radius:12px;
+      cursor:pointer; font-weight:600;
     }
-    button:hover{ filter:brightness(1.05); }
-    button:disabled{ opacity:.55; cursor:not-allowed; }
-    .danger{ background: var(--danger); border-color: rgba(255,255,255,.12); }
-    .accent{ background: rgba(39,49,80,.85); border-color: rgba(255,255,255,.15); }
-    .muted{ opacity:.75; font-size:12px; line-height:1.5; }
-    .spacer{ height: 12px; }
-
-    table{
-      width:100%;
-      border-collapse:collapse;
-      font-size:14px;
-      margin-top: 10px;
-      overflow:hidden;
-      border-radius: 12px;
-    }
-    th,td{
-      padding:10px;
-      border-bottom:1px solid rgba(255,255,255,.08);
-      text-align:left;
-      vertical-align: middle;
-    }
-    th{ color:#bcd3ff; font-weight:600; }
-    .tag{
-      display:inline-block;
-      font-size:12px;
-      padding: 3px 8px;
-      border-radius: 999px;
-      background: rgba(255,255,255,.08);
-      border: 1px solid rgba(255,255,255,.10);
-    }
-
-    .toast{
-      position:fixed; top:12px; left:50%; transform:translateX(-50%);
-      background:#1e2538; border:1px solid rgba(255,255,255,.08);
-      padding:10px 14px; border-radius:10px;
-      box-shadow:0 6px 20px rgba(0,0,0,.35);
-      display:none;
-      max-width:min(720px,92vw);
-      text-align:center;
-      z-index:30;
-    }
-
-    .overlay{
-      position:fixed; inset:0; display:flex; align-items:center; justify-content:center;
-      background:rgba(0,0,0,.55);
-      z-index:50;
-    }
-    .dialog{
-      width:min(460px,92vw);
-      background:#192033; border:1px solid rgba(255,255,255,.12);
-      border-radius:16px; padding:18px;
-      box-shadow:0 18px 60px rgba(0,0,0,.55);
-    }
-    .dialog h3{ margin:0 0 12px; font-size:18px; }
-    .dialog p{ margin:8px 0 12px; font-size:14px; opacity:.92; }
+    button:hover{filter:brightness(1.06)}
+    button:disabled{opacity:.55; cursor:not-allowed}
+    .btn2{background:var(--btn2)}
+    .danger{background:rgba(184,59,59,.18); border-color:rgba(184,59,59,.55)}
+    .ok{background:rgba(47,125,78,.18); border-color:rgba(47,125,78,.55)}
+    .muted{color:var(--muted); font-size:12px;}
+    .spacer{height:12px;}
+    table{width:100%; border-collapse:collapse; margin-top:10px;}
+    th,td{padding:10px 8px; border-bottom:1px solid var(--line); font-size:14px;}
+    th{color:var(--muted); font-weight:700; text-align:left; font-size:12px;}
+    tr:hover td{background:rgba(255,255,255,.03)}
+    .right{text-align:right;}
+    .pill{display:inline-block; padding:6px 10px; border:1px solid var(--line); border-radius:999px; font-size:12px; color:var(--muted);}
+    .topbar{display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;}
+    .msg{margin-top:10px; font-size:13px; padding:10px 12px; border-radius:12px; border:1px solid var(--line); background:rgba(0,0,0,.18);}
+    .msg.err{border-color:rgba(184,59,59,.55); background:rgba(184,59,59,.12)}
+    .msg.ok{border-color:rgba(47,125,78,.55); background:rgba(47,125,78,.12)}
+    .small{font-size:12px;}
+    .id{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; font-size:12px; color:var(--muted);}
   </style>
 </head>
-
 <body>
-  <div class="toast" id="toast" role="status" aria-live="polite"></div>
-
-  <div class="overlay" id="pwOverlay" role="dialog" aria-modal="true">
-    <div class="dialog">
-      <h3>🔒 관리자 비밀번호</h3>
-      <p>비밀번호가 맞아야 관리자 페이지에 들어갈 수 있어요.</p>
-      <div class="row">
-        <input type="password" id="pwInput" placeholder="비밀번호" autocomplete="off" />
-        <button id="pwSubmit">입장</button>
-      </div>
-      <div class="muted" id="pwMsg" style="margin-top:10px;"></div>
-    </div>
-  </div>
-
   <div class="wrap">
-    <div class="panel">
-      <h1>🏆 Leaderboard Admin</h1>
-      <div class="muted">
-        - Supabase leaderboard 테이블을 관리합니다.<br>
-        - 컬럼 가정: <span class="tag">id</span> <span class="tag">name</span> <span class="tag">score</span> <span class="tag">max_combo</span> <span class="tag">created_at</span>
+    <div class="topbar">
+      <h1>🏁 Leaderboard 관리자</h1>
+      <div class="row" style="flex:0 0 auto; gap:8px;">
+        <span id="statusPill" class="pill">상태: 확인 중…</span>
+        <button id="refreshBtn" class="btn2" type="button">새로고침</button>
+        <button id="signOutBtn" class="btn2" type="button" style="display:none;">로그아웃</button>
       </div>
+    </div>
 
-      <div class="spacer"></div>
+    <div class="card" id="loginCard">
+      <div class="muted">삭제는 <b>관리자 로그인</b> 후에만 가능합니다. (Supabase Auth + DELETE 정책 필요)</div>
 
-      <div class="grid">
-        <div class="panel" style="box-shadow:none;">
-          <h1 style="font-size:16px;margin:0 0 10px;">➕ 수동 점수 추가</h1>
-          <div class="row">
-            <div style="flex:1;min-width:220px;">
-              <label>닉네임</label>
-              <input id="name" placeholder="예) halam" />
-            </div>
-            <div style="flex:1;min-width:160px;">
-              <label>점수</label>
-              <input id="score" type="number" placeholder="예) 120" />
-            </div>
-            <div style="flex:1;min-width:160px;">
-              <label>최대 콤보</label>
-              <input id="maxCombo" type="number" placeholder="예) 15" />
-            </div>
+      <form id="loginForm">
+        <div class="row">
+          <div>
+            <label for="email">관리자 이메일</label>
+            <input id="email" type="email" autocomplete="username" required />
           </div>
-
-          <div class="spacer"></div>
-
-          <div class="row">
-            <button id="btnInsert" class="accent">저장</button>
-            <button id="btnRefresh">새로고침</button>
-            <button id="btnLogout" class="danger">로그아웃</button>
-          </div>
-
-          <div class="spacer"></div>
-          <div class="muted">
-            * 이 페이지는 테스트/관리 용도입니다. 운영 공개는 권장하지 않아요.
+          <div>
+            <label for="password">비밀번호</label>
+            <input id="password" type="password" autocomplete="current-password" required />
           </div>
         </div>
 
-        <div class="panel" style="box-shadow:none;">
-          <h1 style="font-size:16px;margin:0 0 10px;">🧹 관리</h1>
-          <div class="muted">
-            - 삭제는 되돌릴 수 없습니다.<br>
-            - “전체 삭제”는 진짜 마지막 수단으로만.
-          </div>
-          <div class="spacer"></div>
-          <div class="row">
-            <button id="btnDeleteAll" class="danger">전체 삭제</button>
-          </div>
+        <div class="spacer"></div>
+        <div class="row" style="justify-content:flex-end;">
+          <button id="loginBtn" class="ok" type="submit" style="flex:0 0 auto;">로그인</button>
+        </div>
+      </form>
+
+      <div id="loginMsg"></div>
+    </div>
+
+    <div class="spacer"></div>
+
+    <div class="card" id="dataCard" style="display:none;">
+      <div class="row" style="align-items:flex-end;">
+        <div>
+          <label for="search">검색 (이름)</label>
+          <input id="search" placeholder="예: halam" />
+        </div>
+        <div style="flex:0 0 auto;">
+          <button id="clearAllBtn" class="danger" type="button" title="주의: 전체 삭제">전체 삭제(위험)</button>
         </div>
       </div>
 
-      <div class="spacer"></div>
+      <div id="dataMsg"></div>
 
-      <div class="panel" style="box-shadow:none;">
-        <h1 style="font-size:16px;margin:0 0 10px;">📋 최근 Top 20</h1>
-        <table>
-          <thead>
-            <tr>
-              <th style="width:60px;">#</th>
-              <th>닉네임</th>
-              <th style="width:110px;">점수</th>
-              <th style="width:110px;">최대 콤보</th>
-              <th style="width:140px;">날짜</th>
-              <th style="width:110px;">삭제</th>
-            </tr>
-          </thead>
-          <tbody id="rows">
-            <tr><td colspan="6">불러오는 중…</td></tr>
-          </tbody>
-        </table>
+      <table>
+        <thead>
+          <tr>
+            <th>순위</th>
+            <th>이름</th>
+            <th class="right">점수</th>
+            <th class="right">최대콤보</th>
+            <th>생성시간</th>
+            <th class="right">관리</th>
+          </tr>
+        </thead>
+        <tbody id="tbody">
+          <tr><td colspan="6" class="muted">불러오는 중…</td></tr>
+        </tbody>
+      </table>
+
+      <div class="muted small" style="margin-top:10px;">
+        정렬: score ↓, max_combo ↓, created_at ↑
       </div>
     </div>
   </div>
@@ -223,200 +127,225 @@
   <script type="module">
     import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
+    // ✅ 너 프로젝트 값으로 고정
     const SUPABASE_URL = "https://oykepnxnbyltcvcqnfbe.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_85W1hHMVmhILGBbrX-l4wg_qmLCn987";
+    const TABLE = "leaderboard";
+
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    const ACCESS_PASSWORD = "halam0202";
-    const ACCESS_KEY = "wam_admin_access_ok_v1";
+    // UI refs
+    const statusPill = document.getElementById("statusPill");
+    const loginCard = document.getElementById("loginCard");
+    const dataCard = document.getElementById("dataCard");
+    const signOutBtn = document.getElementById("signOutBtn");
+    const refreshBtn = document.getElementById("refreshBtn");
+    const loginForm = document.getElementById("loginForm");
+    const loginBtn = document.getElementById("loginBtn");
+    const loginMsg = document.getElementById("loginMsg");
+    const dataMsg = document.getElementById("dataMsg");
+    const tbody = document.getElementById("tbody");
+    const searchInput = document.getElementById("search");
+    const clearAllBtn = document.getElementById("clearAllBtn");
 
-    const toastEl = document.getElementById("toast");
-    function toast(msg){
-      toastEl.textContent = msg;
-      toastEl.style.display = "block";
-      clearTimeout(toast._t);
-      toast._t = setTimeout(()=> toastEl.style.display = "none", 1800);
+    let cachedRows = [];
+
+    function setPill(text, ok = false){
+      statusPill.textContent = text;
+      statusPill.style.borderColor = ok ? "rgba(47,125,78,.55)" : "rgba(255,255,255,.12)";
+      statusPill.style.color = ok ? "rgba(234,234,240,.92)" : "rgba(234,234,240,.72)";
+      statusPill.style.background = ok ? "rgba(47,125,78,.12)" : "rgba(255,255,255,.04)";
     }
 
-    const pwOverlay = document.getElementById("pwOverlay");
-    const pwInput = document.getElementById("pwInput");
-    const pwSubmit = document.getElementById("pwSubmit");
-    const pwMsg = document.getElementById("pwMsg");
-
-    function showPw(msg=""){
-      pwMsg.textContent = msg;
-      pwOverlay.style.display = "flex";
-      pwInput.value = "";
-      pwInput.focus();
+    function showMsg(el, text, type=""){
+      if(!text){ el.innerHTML = ""; return; }
+      const cls = type === "err" ? "msg err" : type === "ok" ? "msg ok" : "msg";
+      el.innerHTML = `<div class="${cls}">${escapeHtml(text)}</div>`;
     }
 
-    function hidePw(){
-      pwOverlay.style.display = "none";
+    function escapeHtml(s){
+      return String(s)
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
     }
 
-    function unlock(){
-      localStorage.setItem(ACCESS_KEY, "1");
-      hidePw();
-      loadRows();
+    function fmtDate(iso){
+      try{
+        const d = new Date(iso);
+        if (Number.isNaN(d.getTime())) return iso ?? "";
+        return d.toLocaleString();
+      }catch{ return iso ?? ""; }
     }
 
-    function lock(){
-      localStorage.removeItem(ACCESS_KEY);
-      showPw("다시 로그인해주세요.");
-    }
+    function applyFilterAndRender(){
+      const q = searchInput.value.trim().toLowerCase();
+      const rows = q
+        ? cachedRows.filter(r => (r.name ?? "").toLowerCase().includes(q))
+        : cachedRows;
 
-    if(localStorage.getItem(ACCESS_KEY) === "1"){
-      hidePw();
-    } else {
-      showPw();
-    }
-
-    pwSubmit.addEventListener("click", ()=>{
-      const v = pwInput.value.trim();
-      if(v === ACCESS_PASSWORD){
-        unlock();
-      } else {
-        showPw("비밀번호가 틀렸습니다.");
-      }
-    });
-
-    pwInput.addEventListener("keydown", (e)=>{
-      if(e.key === "Enter") pwSubmit.click();
-    });
-
-    const rowsEl = document.getElementById("rows");
-
-    function fmtDate(d){
-      try{ return new Date(d).toLocaleDateString("ko-KR"); }catch{ return "-"; }
-    }
-
-    async function loadRows(){
-      if(localStorage.getItem(ACCESS_KEY) !== "1") return;
-
-      rowsEl.innerHTML = `<tr><td colspan="6">불러오는 중…</td></tr>`;
-
-      const { data, error } = await supabase
-        .from("leaderboard")
-        .select("id,name,score,max_combo,created_at")
-        .order("score", { ascending: false })
-        .order("max_combo", { ascending: false })
-        .order("created_at", { ascending: true })
-        .limit(20);
-
-      if(error){
-        rowsEl.innerHTML = `<tr><td colspan="6">불러오기 실패: ${error.message}</td></tr>`;
+      if(!rows.length){
+        tbody.innerHTML = `<tr><td colspan="6" class="muted">데이터가 없습니다.</td></tr>`;
         return;
       }
 
-      if(!data || data.length === 0){
-        rowsEl.innerHTML = `<tr><td colspan="6">데이터가 없습니다.</td></tr>`;
-        return;
-      }
+      tbody.innerHTML = rows.map((r, idx) => {
+        const rank = idx + 1;
+        return `
+          <tr>
+            <td>${rank}</td>
+            <td>
+              <div>${escapeHtml(r.name ?? "")}</div>
+              <div class="id">${escapeHtml(String(r.id ?? ""))}</div>
+            </td>
+            <td class="right">${escapeHtml(String(r.score ?? ""))}</td>
+            <td class="right">${escapeHtml(String(r.max_combo ?? ""))}</td>
+            <td>${escapeHtml(fmtDate(r.created_at))}</td>
+            <td class="right">
+              <button class="danger" data-del="${escapeHtml(String(r.id))}">삭제</button>
+            </td>
+          </tr>
+        `;
+      }).join("");
 
-      rowsEl.innerHTML = data.map((r, i)=>`
-        <tr>
-          <td>${i+1}</td>
-          <td>${String(r.name ?? "")}</td>
-          <td>${Number(r.score ?? 0)}</td>
-          <td>${Number(r.max_combo ?? 0)}</td>
-          <td>${fmtDate(r.created_at)}</td>
-          <td><button class="danger" data-del="${r.id}">삭제</button></td>
-        </tr>
-      `).join("");
-
-      rowsEl.querySelectorAll("[data-del]").forEach(btn=>{
-        btn.addEventListener("click", async ()=>{
+      // bind delete buttons
+      tbody.querySelectorAll("button[data-del]").forEach(btn => {
+        btn.addEventListener("click", async () => {
           const id = btn.getAttribute("data-del");
-          if(!confirm("정말 삭제할까요?")) return;
-
-          const { error: delErr } = await supabase
-            .from("leaderboard")
-            .delete()
-            .eq("id", id);
-
-          if(delErr){
-            toast("삭제 실패: " + delErr.message);
-            return;
-          }
-
-          toast("삭제 완료");
-          loadRows();
+          await deleteRowById(id);
         });
       });
     }
 
-    document.getElementById("btnRefresh").addEventListener("click", loadRows);
+    async function loadLeaderboard(){
+      showMsg(dataMsg, "");
+      tbody.innerHTML = `<tr><td colspan="6" class="muted">불러오는 중…</td></tr>`;
 
-    document.getElementById("btnLogout").addEventListener("click", ()=>{
-      localStorage.removeItem(ACCESS_KEY);
-      showPw("로그아웃 되었습니다.");
-    });
-
-    document.getElementById("btnInsert").addEventListener("click", async ()=>{
-      if(localStorage.getItem(ACCESS_KEY) !== "1"){
-        showPw("비밀번호를 입력해주세요.");
-        return;
-      }
-
-      const name = document.getElementById("name").value.trim();
-      const score = Number(document.getElementById("score").value);
-      const max_combo = Number(document.getElementById("maxCombo").value);
-
-      if(!name || name.length < 2 || name.length > 12){
-        toast("닉네임은 2~12자로 입력해주세요.");
-        return;
-      }
-      if(!Number.isFinite(score) || score < 0){
-        toast("점수는 0 이상의 숫자여야 해요.");
-        return;
-      }
-      if(!Number.isFinite(max_combo) || max_combo < 0){
-        toast("최대 콤보는 0 이상의 숫자여야 해요.");
-        return;
-      }
-
-      const { error } = await supabase
-        .from("leaderboard")
-        .insert([{ name, score, max_combo }]);
+      const { data, error } = await supabase
+        .from(TABLE)
+        .select("id, created_at, name, score, max_combo")
+        .order("score", { ascending: false })
+        .order("max_combo", { ascending: false })
+        .order("created_at", { ascending: true })
+        .limit(500);
 
       if(error){
-        toast("저장 실패: " + error.message);
+        cachedRows = [];
+        tbody.innerHTML = `<tr><td colspan="6" class="muted">불러오기 실패</td></tr>`;
+        showMsg(dataMsg, "불러오기 실패: " + error.message, "err");
         return;
       }
 
-      toast("저장 완료!");
-      document.getElementById("name").value = "";
-      document.getElementById("score").value = "";
-      document.getElementById("maxCombo").value = "";
-      loadRows();
-    });
-
-    document.getElementById("btnDeleteAll").addEventListener("click", async ()=>{
-      if(localStorage.getItem(ACCESS_KEY) !== "1"){
-        showPw("비밀번호를 입력해주세요.");
-        return;
-      }
-
-      const phrase = prompt("전체 삭제하려면 'DELETE ALL' 을 정확히 입력하세요.");
-      if(phrase !== "DELETE ALL") return;
-
-      const { error } = await supabase
-        .from("leaderboard")
-        .delete()
-        .neq("id", "00000000-0000-0000-0000-000000000000");
-
-      if(error){
-        toast("전체 삭제 실패: " + error.message);
-        return;
-      }
-
-      toast("전체 삭제 완료");
-      loadRows();
-    });
-
-    if(localStorage.getItem(ACCESS_KEY) === "1"){
-      loadRows();
+      cachedRows = data ?? [];
+      applyFilterAndRender();
     }
+
+    async function deleteRowById(id){
+      showMsg(dataMsg, "");
+      const ok = confirm(`정말 삭제할까요?\n\nid: ${id}`);
+      if(!ok) return;
+
+      const { error } = await supabase
+        .from(TABLE)
+        .delete()
+        .eq("id", id);
+
+      if(error){
+        showMsg(dataMsg, "삭제 실패: " + error.message + "\n(DELETE 정책이 authenticated에 열려있는지 확인)", "err");
+        return;
+      }
+
+      showMsg(dataMsg, "삭제 완료!", "ok");
+      // local remove + rerender (빠르게)
+      cachedRows = cachedRows.filter(r => String(r.id) !== String(id));
+      applyFilterAndRender();
+    }
+
+    async function clearAllDanger(){
+      const phrase = "전체삭제";
+      const input = prompt(`⚠️ 정말 전체 삭제하려면 "${phrase}" 를 입력하세요.\n(되돌릴 수 없습니다!)`);
+      if(input !== phrase) return;
+
+      // 전체 삭제: where true 같은 형태가 필요해 eq 조건 없이 delete는 막힐 수 있어요.
+      // created_at 기준으로 넓게 지우는 안전한 방식(존재하는 값 조건)
+      const ok = confirm("진짜로 ALL DELETE 실행할까요?");
+      if(!ok) return;
+
+      const { error } = await supabase
+        .from(TABLE)
+        .delete()
+        .not("id", "is", null);
+
+      if(error){
+        showMsg(dataMsg, "전체 삭제 실패: " + error.message, "err");
+        return;
+      }
+      showMsg(dataMsg, "전체 삭제 완료!", "ok");
+      cachedRows = [];
+      applyFilterAndRender();
+    }
+
+    async function syncAuthUI(){
+      const { data: { session } } = await supabase.auth.getSession();
+
+      if(session?.user){
+        setPill("상태: 관리자 로그인됨", true);
+        loginCard.style.display = "none";
+        dataCard.style.display = "block";
+        signOutBtn.style.display = "inline-block";
+        await loadLeaderboard();
+      }else{
+        setPill("상태: 로그아웃됨", false);
+        loginCard.style.display = "block";
+        dataCard.style.display = "none";
+        signOutBtn.style.display = "none";
+      }
+    }
+
+    // events
+    loginForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      showMsg(loginMsg, "");
+
+      loginBtn.disabled = true;
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value;
+
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+
+      loginBtn.disabled = false;
+
+      if(error){
+        showMsg(loginMsg, "로그인 실패: " + error.message, "err");
+        return;
+      }
+
+      showMsg(loginMsg, "로그인 성공!", "ok");
+      await syncAuthUI();
+    });
+
+    signOutBtn.addEventListener("click", async () => {
+      await supabase.auth.signOut();
+      await syncAuthUI();
+    });
+
+    refreshBtn.addEventListener("click", async () => {
+      if(dataCard.style.display !== "none") await loadLeaderboard();
+      else await syncAuthUI();
+    });
+
+    searchInput.addEventListener("input", () => applyFilterAndRender());
+    clearAllBtn.addEventListener("click", clearAllDanger);
+
+    // session changes
+    supabase.auth.onAuthStateChange(async () => {
+      await syncAuthUI();
+    });
+
+    // init
+    await syncAuthUI();
   </script>
 </body>
 </html>
