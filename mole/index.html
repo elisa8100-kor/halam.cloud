@@ -1,30 +1,52 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="utf-8">
-  <title>Game</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <link rel="stylesheet" href="style.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <title>두더지 잡기 게임(Made By Halam)</title>
+  <link rel="stylesheet" href="./css/style.css" />
 </head>
 <body>
+  <div class="wrap">
+    <canvas id="game" width="640" height="720" aria-label="두더지 잡기 게임 캔버스" role="img"></canvas>
 
-  <canvas id="game" width="640" height="720"></canvas>
-
-  <div id="leaderboardBox">
-    <h3>🏆 리더보드</h3>
-    <ul id="leaderboard">
-      <li>불러오는 중입니다...</li>
-    </ul>
+    <div class="panel">
+      <h2>🏆 리더보드 (Top 10)</h2>
+      <table class="board">
+        <thead>
+          <tr><th>#</th><th>닉네임</th><th>점수</th><th>최대 콤보</th><th>날짜</th></tr>
+        </thead>
+        <tbody id="board-body">
+          <tr><td colspan="5">불러오는 중입니다…</td></tr>
+        </tbody>
+      </table>
+      <div class="muted">게임 오버 후 Top 10에 들면 닉네임을 입력해 저장할 수 있습니다.</div>
+    </div>
   </div>
 
-  <div id="nameOverlay">
-    <input id="nickname" placeholder="닉네임">
-    <button id="submitName">저장</button>
-    <button id="cancelName">취소</button>
+  <div class="hudbar">
+    <button id="btnStart">시작</button>
+    <button id="btnPause">일시정지</button>
+    <button id="btnRestart">재시작</button>
   </div>
 
-  <div id="toast"></div>
+  <div class="hint" id="hint">
+    Space 시작 · (모바일) 화면 터치로 타격 · P 일시정지 · R 재시작
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-  <script type="module" src="js/main.js"></script>
+  <div class="overlay" id="nameOverlay" role="dialog" aria-modal="true">
+    <div class="dialog">
+      <h3>Top 10에 진입했습니다</h3>
+      <p>리더보드에 표시할 닉네임을 입력해주세요. (2~12자, 한글/영문/숫자/공백/_/-)</p>
+      <div class="row">
+        <input type="text" id="nickname" placeholder="닉네임" maxlength="12" autocomplete="off" />
+        <button id="submitName">저장</button>
+        <button class="danger" id="cancelName">취소</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="./js/main.js"></script>
 </body>
 </html>
