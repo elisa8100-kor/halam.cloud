@@ -5,7 +5,6 @@ const SUPABASE_ANON_KEY = "YOUR_PUBLIC_ANON_KEY";
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-const SEASON = "season_2";
 const TABLE = "leaderboard";
 const LIMIT = 10;
 
@@ -21,7 +20,6 @@ export async function refreshLeaderboard(showToast){
   const { data, error } = await supabase
     .from(TABLE)
     .select("name, score, max_combo")
-    .eq("season", SEASON)
     .order("score", { ascending: false })
     .order("max_combo", { ascending: false })
     .limit(LIMIT);
@@ -50,7 +48,6 @@ export async function qualifiesTop10(score, maxCombo){
   const { data, error } = await supabase
     .from(TABLE)
     .select("score, max_combo")
-    .eq("season", SEASON)
     .order("score", { ascending: false })
     .order("max_combo", { ascending: false })
     .limit(LIMIT);
@@ -72,8 +69,7 @@ export async function saveScore(name, score, maxCombo){
     .insert([{
       name,
       score,
-      max_combo: maxCombo,
-      season: SEASON
+      max_combo: maxCombo
     }]);
 
   if(error) throw error;
