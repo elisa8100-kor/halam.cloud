@@ -1,118 +1,41 @@
-<!doctype html>
-<html lang="ko">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
-  <title>TETRIS • Deluxe</title>
-  <link rel="stylesheet" href="./styles.css" />
-</head>
-<body>
-  <div class="app">
-    <header class="topbar card">
-      <div class="brand">
-        <span class="logo">🧱</span>
-        <div>
-          <div class="brandTitle">TETRIS</div>
-          <div class="brandSub">Deluxe Web Edition</div>
-        </div>
-      </div>
+* {
+  box-sizing: border-box;
+}
 
-      <div class="pill" id="statusPill">대기중</div>
-    </header>
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: radial-gradient(circle at top, #1e2a52, #070910);
+  color: #ffffff;
+  font-family: system-ui, -apple-system, sans-serif;
 
-    <main class="grid">
-      <section class="card stage">
-        <div class="stageTop">
-          <div class="pill subtle">조작: ← → ↓ / ↑ 회전 / Space 드랍 / C 홀드 / P 일시정지</div>
-          <div class="pill subtle" id="netPill">Supabase: 연결중…</div>
-        </div>
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
-        <div class="stageBody">
-          <canvas id="game" width="300" height="600" aria-label="tetris board"></canvas>
+#app {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 16px;
+  padding: 20px;
+  text-align: center;
+  backdrop-filter: blur(12px);
+}
 
-          <div class="stageSide">
-            <div class="mini cardInner">
-              <div class="miniTitle">NEXT</div>
-              <canvas id="next" width="160" height="160"></canvas>
-            </div>
+h1 {
+  margin: 0 0 12px;
+  letter-spacing: 4px;
+}
 
-            <div class="mini cardInner">
-              <div class="miniTitle">HOLD</div>
-              <canvas id="hold" width="160" height="160"></canvas>
-            </div>
+canvas {
+  display: block;
+  margin: 0 auto 12px;
+  background: #0a0a0a;
+  border: 2px solid #555;
+}
 
-            <div class="stats cardInner">
-              <div class="stat">
-                <div class="k">점수</div>
-                <div class="v" id="score">0</div>
-              </div>
-              <div class="stat">
-                <div class="k">레벨</div>
-                <div class="v" id="level">1</div>
-              </div>
-              <div class="stat">
-                <div class="k">라인</div>
-                <div class="v" id="lines">0</div>
-              </div>
-              <div class="stat">
-                <div class="k">최고점(로컬)</div>
-                <div class="v" id="best">0</div>
-              </div>
-            </div>
-
-            <div class="btnRow">
-              <button class="btn" id="btnStart">▶ 시작</button>
-              <button class="btn" id="btnPause">⏸︎ 일시정지</button>
-              <button class="btn" id="btnRestart">🔁 재시작</button>
-            </div>
-
-            <div class="btnRow">
-              <button class="btn ghost" id="btnSound">🔊 사운드: 켬</button>
-              <button class="btn ghost" id="btnShake">✨ 이펙트: 켬</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="mobilePad cardInner">
-          <button class="btn" data-pad="left">⬅️</button>
-          <button class="btn" data-pad="rotate">🔄</button>
-          <button class="btn" data-pad="right">➡️</button>
-          <button class="btn" data-pad="down">⬇️</button>
-          <button class="btn" data-pad="drop">💥</button>
-          <button class="btn" data-pad="hold">🧤 HOLD</button>
-          <button class="btn ghost wide" data-pad="pause">⏸︎</button>
-        </div>
-
-        <div class="overlay" id="overlay">
-          <div class="overlayBox">
-            <div class="overlayTitle" id="ovTitle">게임 오버</div>
-            <div class="overlayText" id="ovText">점수를 랭킹에 등록할 수 있어요.</div>
-
-            <div class="submitRow">
-              <input id="playerName" maxlength="20" placeholder="이름(1~20자)" />
-              <button class="btn" id="btnSubmit">🏆 등록</button>
-            </div>
-
-            <div class="btnRow">
-              <button class="btn" id="btnPlayAgain">🔁 다시하기</button>
-              <button class="btn ghost" id="btnCloseOverlay">닫기</button>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <aside class="card panel">
-        <div class="panelTitle">🏆 랭킹 Top 20</div>
-        <div class="panelSub" id="lbStatus">불러오는 중…</div>
-        <div class="lb" id="lbList"></div>
-      </aside>
-    </main>
-
-    <footer class="footer">
-      <span class="muted">Made for web. 저장은 Supabase RLS 정책에 의해 안전하게 제한됩니다.</span>
-    </footer>
-  </div>
-
-  <script type="module" src="./js/app.js"></script>
-</body>
-</html>
+#status {
+  opacity: 0.8;
+  font-size: 14px;
+}
