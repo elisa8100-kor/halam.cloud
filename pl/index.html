@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>PL 계산기 (KR/US)</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="bg"></div>
+
+  <main class="wrap">
+    <header class="top">
+      <div class="brand">
+        <div class="logo">₩$</div>
+        <div>
+          <h1>PL 계산기</h1>
+          <p class="sub">한국/미국 선택 → 현재가 불러오기/환율/손익 계산</p>
+        </div>
+      </div>
+
+      <div class="right">
+        <div class="fxCard">
+          <div class="fxTitle">실시간 환율</div>
+          <div class="fxRow">
+            <span id="fxLabel">USD → KRW</span>
+            <strong id="fxValue">불러오는 중…</strong>
+          </div>
+          <div class="fxHint" id="fxHint"></div>
+        </div>
+      </div>
+    </header>
+
+    <!-- 국가 선택 -->
+    <section id="screenPick" class="screen">
+      <div class="grid2">
+        <button class="countryCard" data-country="KR">
+          <div class="flag">🇰🇷</div>
+          <div class="title">한국</div>
+          <div class="desc">KRW 기준, 국내 주식 입력에 최적</div>
+          <div class="pill">₩ 원화 중심</div>
+        </button>
+
+        <button class="countryCard" data-country="US">
+          <div class="flag">🇺🇸</div>
+          <div class="title">미국</div>
+          <div class="desc">USD 기준, 해외주식 입력에 최적</div>
+          <div class="pill">$ 달러 중심</div>
+        </button>
+      </div>
+
+      <div class="note">
+        <strong>현재가 자동 불러오기</strong>는 브라우저 CORS 때문에 “프록시(엣지 함수)”가 필요해요.
+        아래 설정을 하면 종목 추천 + 현재가가 살아납니다.
+      </div>
+    </section>
+
+    <!-- 계산 화면 -->
+    <section id="screenCalc" class="screen hidden">
+      <div class="toolbar">
+        <button class="ghost" id="btnBack">← 국가 다시 선택</button>
+        <div class="mode">
+          <span id="countryBadge" class="badge">KR</span>
+          <span id="ccyBadge" class="badge">KRW</span>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panelHead">
+          <h2 id="panelTitle">한국 주식 손익 계산</h2>
+          <p id="panelDesc" class="sub">종목 입력 → 추천/현재가 불러오기 → 손익 자동 계산</p>
+        </div>
+
+        <div class="formGrid">
+          <div class="field span2">
+            <label>종목</label>
+            <div class="inline">
+              <input id="ticker" placeholder="예: 005930 / AAPL / TSLA" autocomplete="off" />
+              <button id="btnSearch" class="btn">추천</button>
+              <button id="btnQuote" class="btn">현재가</button>
+            </div>
+            <div id="suggestBox" class="suggest hidden"></div>
+            <div class="hint" id="tickerHint"></div>
+          </div>
+
+          <div class="field">
+            <label>매수가</label>
+            <input id="buyPrice" type="number" inputmode="decimal" placeholder="0" />
+          </div>
+
+          <div class="field">
+            <label>수량</label>
+            <input id="qty" type="number" inputmode="decimal" placeholder="0" />
+          </div>
+
+          <div class="field">
+            <label>현재가(또는 매도가)</label>
+            <input id="sellPrice" type="number" inputmode="decimal" placeholder="0" />
+            <div class="hint" id="priceHint"></div>
+          </div>
+
+          <div class="field">
+            <label>수수료(왕복, %)</label>
+            <input id="feePct" type="number" inputmode="decimal" placeholder="예: 0.15" />
+            <div class="hint">입력 없으면 0%</div>
+          </div>
+
+          <div class="field">
+            <label>세금(선택, %)</label>
+            <input id="taxPct" type="number" inputmode="decimal" placeholder="예: 0.23" />
+            <div class="hint">필요할 때만</div>
+          </div>
+
+          <div class="field span2">
+            <label>계산 옵션</label>
+            <div class="chips">
+              <button class="chip active" data-opt="unrealized">현재가 기준(미실현)</button>
+              <button class="chip" data-opt="realized">매도가 기준(실현)</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="results">
+          <div class="card">
+            <div class="k">총 매수금</div>
+            <div class="v" id="buyTotal">-</div>
+          </div>
+          <div class="card">
+            <div class="k">총 평가금</div>
+            <div class="v" id="sellTotal">-</div>
+          </div>
+          <div class="card">
+            <div class="k">손익(수수료/세금 반영)</div>
+            <div class="v big" id="pnl">-</div>
+          </div>
+          <div class="card">
+            <div class="k">수익률</div>
+            <div class="v big" id="roi">-</div>
+          </div>
+          <div class="card span2">
+            <div class="k">환산(실시간 환율)</div>
+            <div class="v" id="converted">-</div>
+            <div class="hint" id="convertedHint"></div>
+          </div>
+        </div>
+
+        <div class="footerHint">
+          <span class="dot"></span>
+          <span id="apiStatus">주가 불러오기: 미설정(수동 입력만 가능)</span>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="./app.js" type="module"></script>
+</body>
+</html>
