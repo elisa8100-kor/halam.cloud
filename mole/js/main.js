@@ -100,18 +100,15 @@ submitNameBtn.addEventListener('click', async ()=>{
   cancelNameBtn.disabled = true;
 
   try{
-  await saveScore(name, pendingScore.score, pendingScore.maxCombo);
+    await saveScore(name, pendingScore.score, pendingScore.maxCombo);
 
-  pendingScore = null;
-  nameOverlay.style.display='none';
-  showToast("리더보드에 저장 완료했습니다.");
+    nameOverlay.style.display='none';
+    showToast("리더보드에 저장 완료했습니다.");
+    pendingScore = null;
 
-  await refreshLeaderboard(showToast);
-}catch(e){
-  console.error(e);
-  showToast("저장 중 문제가 발생했습니다.");
-  }
-
+    await refreshLeaderboard(showToast);
+  }catch{
+    showToast("저장 중 문제가 발생했습니다.");
   }finally{
     submitting = false;
     submitNameBtn.disabled = false;
@@ -131,3 +128,5 @@ nicknameInput.addEventListener('keydown', (e)=>{
 });
 
 await refreshLeaderboard(showToast);
+
+
