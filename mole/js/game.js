@@ -38,7 +38,8 @@ export function createGame(canvas){
     ctx.fillText(text, cx, cy);
   }
 
-  let pointer = { x:0, y:0, justPressed:false, isTouch:false };
+  const pointer = { x:0, y:0, justPressed:false, isTouch:false };
+
   function updatePointer(e){
     const rect = canvas.getBoundingClientRect();
     const sx = rect.width / W;
@@ -48,6 +49,7 @@ export function createGame(canvas){
   }
 
   canvas.addEventListener('pointermove', (e)=>{ updatePointer(e); }, { passive:true });
+
   canvas.addEventListener('pointerdown', (e)=>{
     e.preventDefault();
     pointer.isTouch = (e.pointerType === "touch");
@@ -206,10 +208,10 @@ export function createGame(canvas){
       if(this.state==="hidden") return;
       const r=this.currentRadius();
 
-      c.fillStyle="#783737";
+      c.fillStyle=COLORS.MOLE_SHADOW;
       c.beginPath(); c.arc(this.cx,this.cy+3,r,0,TAU); c.fill();
 
-      c.fillStyle="#d25f5f";
+      c.fillStyle=COLORS.MOLE;
       c.beginPath(); c.arc(this.cx,this.cy,r,0,TAU); c.fill();
 
       const eyeR=Math.max(2, r/8);
@@ -358,6 +360,7 @@ export function createGame(canvas){
           game.score = Math.max(0, game.score-5);
           game.missFeedback();
           game.floatText.pop(pointer.x, pointer.y-10, `MISS`, COLORS.RED);
+
           if(prevCombo >= 8 && window.__showToast) window.__showToast(`콤보 ${prevCombo}에서 끊겼습니다.`);
         }
       }
@@ -461,5 +464,3 @@ export function createGame(canvas){
     setOnGameOver: (fn)=>{ onGameOver = fn; }
   };
 }
-
-
