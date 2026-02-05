@@ -29,10 +29,12 @@ btnStart.addEventListener('click', ()=>{
     game.reset(); game.state=STATE_PLAY;
   }
 });
+
 btnPause.addEventListener('click', ()=>{
   if(game.state===STATE_PLAY) game.state=STATE_PAUSE;
   else if(game.state===STATE_PAUSE) game.state=STATE_PLAY;
 });
+
 btnRestart.addEventListener('click', ()=>{
   setTopHint("");
   game.reset(); game.state=STATE_PLAY;
@@ -107,7 +109,7 @@ submitNameBtn.addEventListener('click', async ()=>{
     pendingScore = null;
 
     await refreshLeaderboard(showToast);
-  }catch{
+  }catch(e){
     showToast("저장 중 문제가 발생했습니다.");
   }finally{
     submitting = false;
@@ -128,5 +130,3 @@ nicknameInput.addEventListener('keydown', (e)=>{
 });
 
 await refreshLeaderboard(showToast);
-
-
