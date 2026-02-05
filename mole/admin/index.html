@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Leaderboard 관리자 (추가/삭제)</title>
+  <title>관리자 MODE</title>
   <style>
     body{font-family:system-ui,Segoe UI,Roboto,"Pretendard","Malgun Gothic",sans-serif;margin:0;background:#0f1320;color:#eaeaf0}
     .wrap{max-width:980px;margin:0 auto;padding:18px}
@@ -30,38 +30,38 @@
 </head>
 <body>
 <div class="wrap">
-  <h2>🏁 Leaderboard 관리자 (비번 + 추가/삭제)</h2>
+  <h2>Leaderboard 관리자</h2>
 
   <div class="split">
 
     <!-- 좌: 관리자 비번 + 삭제 RPC -->
     <div class="card">
-      <div class="mono">관리자 비밀번호(삭제용 RPC):</div>
+      <div class="mono">관리자 비밀번호 :</div>
       <div class="row" style="margin-top:8px">
-        <input id="pw" type="password" placeholder="관리자 비밀번호" />
-        <button id="loadBtn" type="button">목록 불러오기</button>
+        <input id="pw" type="password" placeholder="관리자 비밀번호를 입력하세요" />
+        <button id="loadBtn" type="button">불러오기</button>
       </div>
       <div id="msg" class="msg" style="display:none;"></div>
       <div class="mono" style="margin-top:8px">
-        삭제는 RPC(admin_delete_leaderboard)로 처리됨.
       </div>
     </div>
 
     <!-- 우: 추가 폼 (INSERT) -->
     <div class="card">
-      <div class="mono">랭킹 추가(INSERT):</div>
+      <div class="mono">랭킹 추가:
+      추가하고 싶은 닉네임, 점수, 최대콤보를 입력하세요.</div>
 
       <div class="label">이름</div>
-      <input id="name" placeholder="이름" />
+      <input id="name" placeholder="이름을 입력하세요" />
 
       <div class="row">
         <div>
           <div class="label">점수</div>
-          <input id="score" type="number" placeholder="점수" />
+          <input id="score" type="number" placeholder="점수를 입력하세요" />
         </div>
         <div>
           <div class="label">최대 콤보</div>
-          <input id="max_combo" type="number" placeholder="최대콤보" />
+          <input id="max_combo" type="number" placeholder="최대콤보를 입력하세요" />
         </div>
       </div>
 
@@ -71,7 +71,7 @@
       </div>
 
       <div class="mono" style="margin-top:8px">
-        ⚠️ 추가가 안 되면 Supabase Policies에서 INSERT(anon) 허용 필요.
+        
       </div>
     </div>
 
@@ -81,7 +81,7 @@
 
   <div class="card">
     <div class="row">
-      <input id="search" placeholder="이름 검색" />
+      <input id="search" placeholder="검색하고 싶은 이름을 적으세요" />
       <button id="refreshBtn" type="button">새로고침</button>
     </div>
 
@@ -93,11 +93,11 @@
           <th class="right">점수</th>
           <th class="right">최대콤보</th>
           <th>시간</th>
-          <th class="right">삭제</th>
+          <th class="right"></th>
         </tr>
       </thead>
       <tbody id="tbody">
-        <tr><td colspan="6" class="mono">불러오기 전…</td></tr>
+        <tr><td colspan="6" class="mono">불러오기 전입니다…</td></tr>
       </tbody>
     </table>
   </div>
@@ -141,7 +141,7 @@
     const filtered = q ? rows.filter(r => (r.name||"").toLowerCase().includes(q)) : rows;
 
     if(!filtered.length){
-      tbody.innerHTML = `<tr><td colspan="6" class="mono">데이터 없음</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="6" class="mono">데이터가 없습니다.</td></tr>`;
       return;
     }
 
@@ -171,7 +171,7 @@
 
   async function load(){
     show("");
-    tbody.innerHTML = `<tr><td colspan="6" class="mono">불러오는 중…</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="6" class="mono">불러오는 중입니다…</td></tr>`;
 
     const { data, error } = await supabase
       .from("leaderboard")
@@ -199,9 +199,9 @@
     const score = Number(scoreEl.value);
     const max_combo = Number(maxComboEl.value);
 
-    if(!name){ alert("이름을 입력해줘!"); return; }
-    if(!Number.isFinite(score)){ alert("점수(숫자)를 입력해줘!"); return; }
-    if(!Number.isFinite(max_combo)){ alert("최대콤보(숫자)를 입력해줘!"); return; }
+    if(!name){ alert("이름을 입력해주세요!"); return; }
+    if(!Number.isFinite(score)){ alert("점수를 입력해주세요!"); return; }
+    if(!Number.isFinite(max_combo)){ alert("최대콤보를 입력해주세요!"); return; }
 
     // ✅ INSERT는 정책(public insert leaderboard)이 허용해야 함
     const { error } = await supabase
@@ -222,7 +222,7 @@
 
   async function del(id){
     const password = pwEl.value;
-    if(!password){ alert("관리자 비밀번호를 먼저 입력해줘!"); return; }
+    if(!password){ alert("관리자 비밀번호를 먼저 입력해주세요!"); return; }
     if(!confirm(`정말 삭제할까요?\n\nid: ${id}`)) return;
 
     const { data, error } = await supabase.rpc("admin_delete_leaderboard", {
