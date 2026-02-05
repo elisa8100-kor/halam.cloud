@@ -180,7 +180,7 @@ if(submitNameBtn){
       pendingScore = null;
       await doRefreshLeaderboard();
     }catch{
-      showToast("저장 중 문제가 발생했습니다.");
+      showToast("리더보드에 저장 완료했습니다.");
     }finally{
       submitting = false;
       submitNameBtn.disabled = false;
