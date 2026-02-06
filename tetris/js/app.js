@@ -6,17 +6,17 @@ const nctx = nextCanvas.getContext("2d");
 const scoreEl = document.getElementById("score");
 const levelEl = document.getElementById("level");
 
-const COLS = 10, ROWS = 20, BLOCK = 30;
-canvas.width = COLS * BLOCK;
-canvas.height = ROWS * BLOCK;
+const COLS = 10, ROWS = 20, B = 30;
+canvas.width = COLS * B;
+canvas.height = ROWS * B;
 
-// 🎨 Guideline colors
+// 🎨 TCC 색상
 const COLORS = {
   I:"#00f0f0", J:"#0000f0", L:"#f0a000",
   O:"#f0f000", S:"#00f000", T:"#a000f0", Z:"#f00000"
 };
 
-const TETROMINOS = {
+const SHAPES = {
   I:[[1,1,1,1]],
   J:[[1,0,0],[1,1,1]],
   L:[[0,0,1],[1,1,1]],
@@ -26,149 +26,120 @@ const TETROMINOS = {
   Z:[[1,1,0],[0,1,1]]
 };
 
-let board = Array.from({length: ROWS}, ()=>Array(COLS).fill(null));
-let score = 0;
-let level = 1;
-let dropInterval = 800;
-let lastTime = 0;
-let gameOver = false;
+let board = Array.from({length:ROWS},()=>Array(COLS).fill(null));
+let score=0, level=1, speed=800;
+let last=0, over=false, pause=false;
 
-function randomPiece() {
-  const keys = Object.keys(TETROMINOS);
-  const type = keys[Math.floor(Math.random()*keys.length)];
-  return {
-    type,
-    shape: TETROMINOS[type],
-    color: COLORS[type],
-    x: Math.floor(COLS/2)-1,
-    y: 0
-  };
+function randPiece(){
+  const keys = Object.keys(SHAPES);
+  const t = keys[Math.random()*7|0];
+  return {t, s:SHAPES[t], c:COLORS[t], x:3, y:0};
 }
 
-let piece = randomPiece();
-let nextPiece = randomPiece();
+let piece = randPiece();
+let next = randPiece();
 
-function drawCell(x,y,color){
-  ctx.fillStyle = color;
-  ctx.fillRect(x*BLOCK,y*BLOCK,BLOCK,BLOCK);
+function drawCell(x,y,c){
+  ctx.fillStyle=c;
+  ctx.fillRect(x*B,y*B,B,B);
   ctx.strokeStyle="#111";
-  ctx.strokeRect(x*BLOCK,y*BLOCK,BLOCK,BLOCK);
-}
-
-function drawNext(){
-  nctx.clearRect(0,0,120,120);
-  nextPiece.shape.forEach((row,y)=>
-    row.forEach((v,x)=>{
-      if(v){
-        nctx.fillStyle = nextPiece.color;
-        nctx.fillRect(x*30,y*30,30,30);
-      }
-    })
-  );
+  ctx.strokeRect(x*B,y*B,B,B);
 }
 
 function draw(){
   ctx.clearRect(0,0,canvas.width,canvas.height);
-
-  board.forEach((row,y)=>
-    row.forEach((cell,x)=>{
-      if(cell) drawCell(x,y,cell);
-    })
-  );
-
-  piece.shape.forEach((row,y)=>
-    row.forEach((v,x)=>{
-      if(v) drawCell(piece.x+x,piece.y+y,piece.color);
-    })
-  );
+  board.forEach((r,y)=>r.forEach((c,x)=>c&&drawCell(x,y,c)));
+  piece.s.forEach((r,y)=>r.forEach((v,x)=>v&&drawCell(piece.x+x,piece.y+y,piece.c)));
 }
 
-function collide(px,py,shape){
-  return shape.some((row,y)=>
-    row.some((v,x)=>{
-      if(!v) return false;
-      const nx=px+x, ny=py+y;
-      return nx<0||nx>=COLS||ny>=ROWS||board[ny]?.[nx];
-    })
-  );
+function drawNext(){
+  nctx.clearRect(0,0,120,120);
+  next.s.forEach((r,y)=>r.forEach((v,x)=>{
+    if(v){
+      nctx.fillStyle=next.c;
+      nctx.fillRect(x*30,y*30,30,30);
+    }
+  }));
+}
+
+function hit(px,py,s){
+  return s.some((r,y)=>r.some((v,x)=>{
+    if(!v) return false;
+    let nx=px+x, ny=py+y;
+    return nx<0||nx>=COLS||ny>=ROWS||board[ny]?.[nx];
+  }));
 }
 
 function merge(){
-  piece.shape.forEach((row,y)=>
-    row.forEach((v,x)=>{
-      if(v) board[piece.y+y][piece.x+x]=piece.color;
-    })
-  );
+  piece.s.forEach((r,y)=>r.forEach((v,x)=>{
+    if(v) board[piece.y+y][piece.x+x]=piece.c;
+  }));
 }
 
-function clearLines(){
-  let cleared = 0;
-  board = board.filter(row=>{
-    if(row.every(cell=>cell)){
-      cleared++;
-      return false;
-    }
-    return true;
-  });
-
+function clear(){
+  let c=0;
+  board=board.filter(r=>!(r.every(v=>v)&&c++));
   while(board.length<ROWS) board.unshift(Array(COLS).fill(null));
-
-  if(cleared){
-    score += cleared * 100;
-    level = Math.floor(score / 500) + 1;
-    dropInterval = Math.max(120, 800 - (level-1)*80);
-    scoreEl.textContent = score;
-    levelEl.textContent = level;
+  if(c){
+    score+=c*100;
+    level=Math.floor(score/500)+1;
+    speed=Math.max(120,800-(level-1)*80);
+    scoreEl.textContent=score;
+    levelEl.textContent=level;
   }
 }
 
 function rotate(){
-  const r = piece.shape[0].map((_,i)=>
-    piece.shape.map(row=>row[i]).reverse()
-  );
-  if(!collide(piece.x,piece.y,r)) piece.shape = r;
+  const r=piece.s[0].map((_,i)=>piece.s.map(r=>r[i]).reverse());
+  if(!hit(piece.x,piece.y,r)) piece.s=r;
 }
 
-function drop(){
-  if(!collide(piece.x,piece.y+1,piece.shape)){
+function drop(hard=false){
+  if(!hit(piece.x,piece.y+1,piece.s)){
     piece.y++;
   } else {
-    merge();
-    clearLines();
-    piece = nextPiece;
-    nextPiece = randomPiece();
-    drawNext();
-    if(collide(piece.x,piece.y,piece.shape)) gameOver = true;
+    merge(); clear();
+    piece=next; next=randPiece(); drawNext();
+    if(hit(piece.x,piece.y,piece.s)) over=true;
   }
+  if(hard) while(!hit(piece.x,piece.y+1,piece.s)) piece.y++;
 }
 
-function action(a){
-  if(gameOver) return;
-  if(a==="left"&&!collide(piece.x-1,piece.y,piece.shape)) piece.x--;
-  if(a==="right"&&!collide(piece.x+1,piece.y,piece.shape)) piece.x++;
+function act(a){
+  if(over||pause) return;
+  if(a==="left"&&!hit(piece.x-1,piece.y,piece.s)) piece.x--;
+  if(a==="right"&&!hit(piece.x+1,piece.y,piece.s)) piece.x++;
   if(a==="down") drop();
   if(a==="rotate") rotate();
+  if(a==="drop") drop(true);
 }
 
 document.addEventListener("keydown",e=>{
-  if(e.key==="ArrowLeft") action("left");
-  if(e.key==="ArrowRight") action("right");
-  if(e.key==="ArrowDown") action("down");
-  if(e.key==="ArrowUp") action("rotate");
+  if(e.key==="ArrowLeft") act("left");
+  if(e.key==="ArrowRight") act("right");
+  if(e.key==="ArrowDown") act("down");
+  if(e.key==="ArrowUp") act("rotate");
+  if(e.code==="Space") act("drop");
+  if(e.key==="p"||e.key==="P") pause=!pause;
 });
 
 document.querySelectorAll("#controls button").forEach(b=>{
   b.addEventListener("touchstart",e=>{
     e.preventDefault();
-    action(b.dataset.action);
+    act(b.dataset.a);
   });
 });
 
 function loop(t=0){
-  if(!gameOver && t-lastTime>dropInterval){
-    drop(); lastTime=t;
-  }
+  if(!over&&!pause&&t-last>speed){ drop(); last=t; }
   draw();
+  if(over){
+    ctx.fillStyle="rgba(0,0,0,.7)";
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.fillStyle="#fff";
+    ctx.font="32px sans-serif";
+    ctx.fillText("GAME OVER",40,300);
+  }
   requestAnimationFrame(loop);
 }
 
