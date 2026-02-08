@@ -1,250 +1,113 @@
 <!doctype html>
 <html lang="ko">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Leaderboard 관리자 (추가/삭제)</title>
-  <style>
-    body{font-family:system-ui,Segoe UI,Roboto,"Pretendard","Malgun Gothic",sans-serif;margin:0;background:#0f1320;color:#eaeaf0}
-    .wrap{max-width:980px;margin:0 auto;padding:18px}
-    h2{margin:0 0 12px}
-    .card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:14px}
-    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-    .row>*{flex:1}
-    input,button{padding:11px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:rgba(0,0,0,.25);color:#eaeaf0}
-    button{cursor:pointer;background:#273150;font-weight:700}
-    button:hover{filter:brightness(1.06)}
-    button:disabled{opacity:.55;cursor:not-allowed}
-    .danger{background:rgba(184,59,59,.18);border-color:rgba(184,59,59,.55)}
-    .ok{background:rgba(47,125,78,.18);border-color:rgba(47,125,78,.55)}
-    .msg{margin-top:10px;padding:10px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.12);background:rgba(0,0,0,.18);white-space:pre-wrap}
-    .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;color:rgba(234,234,240,.75)}
-    table{width:100%;border-collapse:collapse;margin-top:12px}
-    th,td{padding:10px 8px;border-bottom:1px solid rgba(255,255,255,.12);text-align:left}
-    th{font-size:12px;color:rgba(234,234,240,.7)}
-    .right{text-align:right}
-    .split{display:grid;grid-template-columns:1fr;gap:12px}
-    @media (min-width:860px){ .split{grid-template-columns:1fr 1fr;} }
-    .label{font-size:12px;color:rgba(234,234,240,.7);margin:8px 0 6px}
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin</title>
+
+<style>
+body{
+  margin:0;
+  font-family:system-ui;
+  background:#0e1020;
+  color:#fff;
+}
+.center{
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.card{
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.15);
+  border-radius:18px;
+  padding:30px;
+  max-width:420px;
+  width:100%;
+}
+input,button{
+  width:100%;
+  padding:12px;
+  margin-top:10px;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.25);
+  background:rgba(0,0,0,.25);
+  color:#fff;
+  font-size:15px;
+}
+button{
+  cursor:pointer;
+  font-weight:700;
+}
+.lock{background:#822}
+.unlock{background:#286}
+.hidden{display:none}
+</style>
 </head>
+
 <body>
-<div class="wrap">
-  <h2>🏁 Leaderboard 관리자 (비번 + 추가/삭제)</h2>
 
-  <div class="split">
-
-    <!-- 좌: 관리자 비번 + 삭제 RPC -->
-    <div class="card">
-      <div class="mono">관리자 비밀번호(삭제용 RPC):</div>
-      <div class="row" style="margin-top:8px">
-        <input id="pw" type="password" placeholder="관리자 비밀번호" />
-        <button id="loadBtn" type="button">목록 불러오기</button>
-      </div>
-      <div id="msg" class="msg" style="display:none;"></div>
-      <div class="mono" style="margin-top:8px">
-        삭제는 RPC(admin_delete_leaderboard)로 처리됨.
-      </div>
-    </div>
-
-    <!-- 우: 추가 폼 (INSERT) -->
-    <div class="card">
-      <div class="mono">랭킹 추가(INSERT):</div>
-
-      <div class="label">이름</div>
-      <input id="name" placeholder="이름" />
-
-      <div class="row">
-        <div>
-          <div class="label">점수</div>
-          <input id="score" type="number" placeholder="점수" />
-        </div>
-        <div>
-          <div class="label">최대 콤보</div>
-          <input id="max_combo" type="number" placeholder="최대콤보" />
-        </div>
-      </div>
-
-      <div class="row" style="margin-top:10px">
-        <button id="addBtn" class="ok" type="button">추가</button>
-        <button id="resetBtn" type="button">초기화</button>
-      </div>
-
-      <div class="mono" style="margin-top:8px">
-        ⚠️ 추가가 안 되면 Supabase Policies에서 INSERT(anon) 허용 필요.
-      </div>
-    </div>
-
-  </div>
-
-  <div style="height:12px"></div>
-
+<!-- 🔒 잠금 화면 -->
+<div id="lockScreen" class="center hidden">
   <div class="card">
-    <div class="row">
-      <input id="search" placeholder="이름 검색" />
-      <button id="refreshBtn" type="button">새로고침</button>
-    </div>
-
-    <table>
-      <thead>
-        <tr>
-          <th>순위</th>
-          <th>이름</th>
-          <th class="right">점수</th>
-          <th class="right">최대콤보</th>
-          <th>시간</th>
-          <th class="right">삭제</th>
-        </tr>
-      </thead>
-      <tbody id="tbody">
-        <tr><td colspan="6" class="mono">불러오기 전…</td></tr>
-      </tbody>
-    </table>
+    <h2>🔒 관리자 페이지 잠김</h2>
+    <p>비밀번호를 입력해야 접근할 수 있어</p>
+    <input id="pwInput" type="password" placeholder="관리자 비밀번호">
+    <button onclick="unlock()">잠금 해제</button>
   </div>
 </div>
 
-<script type="module">
-  import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+<!-- 🔓 관리자 페이지 -->
+<div id="adminPage" class="center hidden">
+  <div class="card">
+    <h2>🛠 관리자</h2>
+    <button class="lock" onclick="lock()">사이트 잠그기</button>
+    <hr style="margin:15px 0;opacity:.2">
+    <p>여기에 기존 관리자 기능 들어가면 됨</p>
+  </div>
+</div>
 
-  const supabase = createClient(
-    "https://oykepnxnbyltcvcqnfbe.supabase.co",
-    "sb_publishable_85W1hHMVmhILGBbrX-l4wg_qmLCn987"
-  );
+<script>
+const ADMIN_PW = "halam0202";
+const LOCK_KEY = "site_locked";
 
-  const msg = document.getElementById("msg");
-  const tbody = document.getElementById("tbody");
-  const pwEl = document.getElementById("pw");
-  const searchEl = document.getElementById("search");
+const lockScreen = document.getElementById("lockScreen");
+const adminPage = document.getElementById("adminPage");
+const pwInput = document.getElementById("pwInput");
 
-  const nameEl = document.getElementById("name");
-  const scoreEl = document.getElementById("score");
-  const maxComboEl = document.getElementById("max_combo");
+function isLocked(){
+  return localStorage.getItem(LOCK_KEY)==="1";
+}
 
-  let rows = [];
-
-  function show(text){
-    msg.style.display = text ? "block" : "none";
-    msg.textContent = text || "";
+function render(){
+  if(isLocked()){
+    lockScreen.classList.remove("hidden");
+    adminPage.classList.add("hidden");
+  }else{
+    lockScreen.classList.add("hidden");
+    adminPage.classList.remove("hidden");
   }
+}
 
-  function fmt(iso){
-    try{ return new Date(iso).toLocaleString(); }catch{ return iso; }
+function unlock(){
+  if(pwInput.value!==ADMIN_PW){
+    alert("비밀번호 틀림");
+    return;
   }
+  localStorage.setItem(LOCK_KEY,"0");
+  pwInput.value="";
+  render();
+}
 
-  function escapeHtml(s){
-    return String(s).replaceAll("&","&amp;").replaceAll("<","&lt;")
-      .replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");
-  }
+function lock(){
+  if(!confirm("관리자 사이트를 잠글까?"))return;
+  localStorage.setItem(LOCK_KEY,"1");
+  render();
+}
 
-  function render(){
-    const q = searchEl.value.trim().toLowerCase();
-    const filtered = q ? rows.filter(r => (r.name||"").toLowerCase().includes(q)) : rows;
-
-    if(!filtered.length){
-      tbody.innerHTML = `<tr><td colspan="6" class="mono">데이터 없음</td></tr>`;
-      return;
-    }
-
-    tbody.innerHTML = filtered.map((r, i) => `
-      <tr>
-        <td>${i+1}</td>
-        <td>
-          <div>${escapeHtml(r.name ?? "")}</div>
-          <div class="mono">${escapeHtml(String(r.id ?? ""))}</div>
-        </td>
-        <td class="right">${escapeHtml(String(r.score ?? ""))}</td>
-        <td class="right">${escapeHtml(String(r.max_combo ?? ""))}</td>
-        <td class="mono">${escapeHtml(fmt(r.created_at))}</td>
-        <td class="right">
-          <button class="danger" data-id="${escapeHtml(String(r.id))}">삭제</button>
-        </td>
-      </tr>
-    `).join("");
-
-    tbody.querySelectorAll("button[data-id]").forEach(btn=>{
-      btn.addEventListener("click", async ()=>{
-        const id = btn.getAttribute("data-id");
-        await del(id);
-      });
-    });
-  }
-
-  async function load(){
-    show("");
-    tbody.innerHTML = `<tr><td colspan="6" class="mono">불러오는 중…</td></tr>`;
-
-    const { data, error } = await supabase
-      .from("leaderboard")
-      .select("id, created_at, name, score, max_combo")
-      .order("score", { ascending: false })
-      .order("max_combo", { ascending: false })
-      .order("created_at", { ascending: true })
-      .limit(500);
-
-    if(error){
-      rows = [];
-      show("불러오기 실패: " + error.message);
-      tbody.innerHTML = `<tr><td colspan="6" class="mono">실패</td></tr>`;
-      return;
-    }
-
-    rows = data || [];
-    render();
-  }
-
-  async function addRow(){
-    show("");
-
-    const name = (nameEl.value || "").trim();
-    const score = Number(scoreEl.value);
-    const max_combo = Number(maxComboEl.value);
-
-    if(!name){ alert("이름을 입력해줘!"); return; }
-    if(!Number.isFinite(score)){ alert("점수(숫자)를 입력해줘!"); return; }
-    if(!Number.isFinite(max_combo)){ alert("최대콤보(숫자)를 입력해줘!"); return; }
-
-    // ✅ INSERT는 정책(public insert leaderboard)이 허용해야 함
-    const { error } = await supabase
-      .from("leaderboard")
-      .insert([{ name, score, max_combo }]);
-
-    if(error){
-      show("추가 실패: " + error.message + "\n\n(Policies에서 INSERT/anon 허용 확인)");
-      return;
-    }
-
-    show("추가 완료!");
-    nameEl.value = "";
-    scoreEl.value = "";
-    maxComboEl.value = "";
-    await load();
-  }
-
-  async function del(id){
-    const password = pwEl.value;
-    if(!password){ alert("관리자 비밀번호를 먼저 입력해줘!"); return; }
-    if(!confirm(`정말 삭제할까요?\n\nid: ${id}`)) return;
-
-    const { data, error } = await supabase.rpc("admin_delete_leaderboard", {
-      p_password: password,
-      p_id: String(id),
-    });
-
-    if(error){ show("삭제 실패: " + error.message); return; }
-    if(!data?.ok){ show("삭제 실패: " + (data?.error || "UNKNOWN")); return; }
-
-    show(`삭제 완료! (deleted=${data.deleted})`);
-    rows = rows.filter(r => String(r.id) !== String(id));
-    render();
-  }
-
-  document.getElementById("loadBtn").addEventListener("click", load);
-  document.getElementById("refreshBtn").addEventListener("click", load);
-  document.getElementById("addBtn").addEventListener("click", addRow);
-  document.getElementById("resetBtn").addEventListener("click", ()=>{
-    nameEl.value=""; scoreEl.value=""; maxComboEl.value="";
-  });
-  searchEl.addEventListener("input", render);
+render();
 </script>
+
 </body>
 </html>
