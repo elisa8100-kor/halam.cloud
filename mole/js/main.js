@@ -1,3 +1,25 @@
+if (localStorage.getItem("site_locked") === "1") {
+  document.body.innerHTML = `
+    <div style="
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:#0f1320;
+      color:#fff;
+      font-family:system-ui;
+      text-align:center;
+    ">
+      <div>
+        <h1>🔒 수업시간 중입니다.</h1>
+        <h4>          -관리자-</h4>
+        <p>지금 게임을 하실수 없습니다.</p>
+      </div>
+    </div>
+  `;
+  
+  throw new Error("SITE LOCKED");
+}
 import { createGame, STATE_MENU, STATE_PLAY, STATE_PAUSE, STATE_GAMEOVER } from "./game.js";
 import {
   refreshLeaderboard,
