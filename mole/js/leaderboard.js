@@ -1,25 +1,20 @@
-import { supabase } from "./main.js";
+const KEY = "MOLE_RANK";
 
-export async function loadLeaderboard() {
-  const box = document.getElementById("leaderboard");
+export function loadLeaderboard() {
+  const list = document.getElementById("rankList");
+  list.innerHTML = "";
 
-  const { data, error } = await supabase
-    .from("leaderboard")
-    .select("*")
-    .order("score", { ascending: false })
-    .limit(10);
+  const data = JSON.parse(localStorage.getItem(KEY)) || [];
+  data.slice(0, 20).forEach((s, i) => {
+    const li = document.createElement("li");
+    li.textContent = `${i + 1}위 - ${s}점`;
+    list.appendChild(li);
+  });
+}
 
-  if (error) {
-    box.textContent = "불러오기 실패";
-    return;
-  }
-
-  if (!data.length) {
-    box.textContent = "아직 기록이 없습니다.";
-    return;
-  }
-
-  box.innerHTML = data
-    .map((r, i) => `${i + 1}. ${r.name} - ${r.score}`)
-    .join("<br>");
+export function saveScore(score) {
+  let data = JSON.parse(localStorage.getItem(KEY)) || [];
+  data.push(score);
+  data.sort((a, b) => b - a);
+  localStorage.setItem(KEY, JSON.stringify(data.slice(0, 20)));
 }
