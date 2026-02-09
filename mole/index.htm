@@ -2,46 +2,28 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <title>Whack Game</title>
+  <title>두더지 잡기</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
 
-<h1>🐹 Whack Game</h1>
-
-<div id="hint"></div>
-
-<canvas id="game" width="400" height="400"></canvas>
-
-<div class="controls">
-  <button id="btnStart">시작</button>
-  <button id="btnPause">일시정지</button>
-  <button id="btnRestart">재시작</button>
-</div>
-
-<h2>🏆 Leaderboard</h2>
-<ul id="leaderboard"></ul>
-
-<div id="toast"></div>
-
-<!-- 비밀번호 오버레이 -->
-<div class="overlay" id="pwOverlay">
-  <div class="dialog">
-    <h3>🔒 비밀번호</h3>
-    <input type="password" id="pwInput" placeholder="비밀번호" />
-    <button id="pwSubmit">입장</button>
-    <p id="pwMsg"></p>
+<div class="hud">
+  <div>
+    점수: <span id="score">0</span><br>
+    콤보: <span id="combo">0</span>
+  </div>
+  <div class="right">
+    남은 시간: <span id="time">10</span><br>
+    최대 점수: <span id="bestScore">0</span>
   </div>
 </div>
 
-<!-- 닉네임 입력 -->
-<div class="overlay" id="nameOverlay" style="display:none">
-  <div class="dialog">
-    <h3>닉네임 입력</h3>
-    <input id="nickname" placeholder="닉네임" />
-    <button id="submitName">저장</button>
-    <button id="cancelName">취소</button>
-  </div>
+<div id="gameBoard"></div>
+
+<div class="leaderboard-box">
+  <h3>🏆 리더보드 (Top 10)</h3>
+  <div id="leaderboard">불러오는 중...</div>
 </div>
 
 <script type="module" src="js/main.js"></script>
