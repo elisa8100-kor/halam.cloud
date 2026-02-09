@@ -1,130 +1,49 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8" />
-<title>LOCKED GAME</title>
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-
-<style>
-  body {
-    margin: 0;
-    background: #111;
-    color: #fff;
-    font-family: Arial, sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-  }
-
-  #game {
-    text-align: center;
-  }
-
-  canvas {
-    background: #000;
-    border: 3px solid #555;
-  }
-
-  #lockScreen {
-    position: fixed;
-    inset: 0;
-    background: black;
-    color: white;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    font-size: 2rem;
-    z-index: 9999;
-  }
-</style>
+  <meta charset="UTF-8" />
+  <title>Whack Game</title>
+  <link rel="stylesheet" href="css/style.css" />
 </head>
-
 <body>
 
-<div id="lockScreen">🔒 현재 사이트가 잠겨 있습니다</div>
+<h1>🐹 Whack Game</h1>
 
-<div id="game">
-  <h1>게임 화면</h1>
-  <canvas id="canvas" width="300" height="300"></canvas>
-  <p>방향키로 움직이세요</p>
+<div id="hint"></div>
+
+<canvas id="game" width="400" height="400"></canvas>
+
+<div class="controls">
+  <button id="btnStart">시작</button>
+  <button id="btnPause">일시정지</button>
+  <button id="btnRestart">재시작</button>
 </div>
 
-<script type="module">
-/* =========================
-   🔐 Firebase 잠금 시스템
-========================= */
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+<h2>🏆 Leaderboard</h2>
+<ul id="leaderboard"></ul>
 
-const firebaseConfig = {
-  apiKey: "AIzaSyBlhU1NVqceV0zYtgSaDF1Q22DebLVlT7E",
-  authDomain: "mole-71eed.firebaseapp.com",
-  projectId: "mole-71eed",
-  storageBucket: "mole-71eed.appspot.com",
-  messagingSenderId: "770752185372",
-  appId: "1:770752185372:web:44c462f2021f6752750bd9"
-};
+<div id="toast"></div>
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+<!-- 비밀번호 오버레이 -->
+<div class="overlay" id="pwOverlay">
+  <div class="dialog">
+    <h3>🔒 비밀번호</h3>
+    <input type="password" id="pwInput" placeholder="비밀번호" />
+    <button id="pwSubmit">입장</button>
+    <p id="pwMsg"></p>
+  </div>
+</div>
 
-const lockRef = doc(db, "site", "lock");
-const lockScreen = document.getElementById("lockScreen");
-const gameDiv = document.getElementById("game");
+<!-- 닉네임 입력 -->
+<div class="overlay" id="nameOverlay" style="display:none">
+  <div class="dialog">
+    <h3>닉네임 입력</h3>
+    <input id="nickname" placeholder="닉네임" />
+    <button id="submitName">저장</button>
+    <button id="cancelName">취소</button>
+  </div>
+</div>
 
-let isLocked = false;
-
-onSnapshot(lockRef, (snap) => {
-  if (snap.exists() && snap.data().locked === true) {
-    isLocked = true;
-    lockScreen.style.display = "flex";
-    gameDiv.style.display = "none";
-  } else {
-    isLocked = false;
-    lockScreen.style.display = "none";
-    gameDiv.style.display = "block";
-    requestAnimationFrame(gameLoop);
-  }
-});
-
-/* =========================
-   🎮 게임 로직
-========================= */
-const canvas = document.getElementById("canvas");
-const ctx = canvas.getContext("2d");
-
-let x = 140;
-let y = 140;
-const size = 20;
-const speed = 4;
-
-function draw() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.fillStyle = "lime";
-  ctx.fillRect(x, y, size, size);
-}
-
-function gameLoop() {
-  if (isLocked) return;
-  draw();
-  requestAnimationFrame(gameLoop);
-}
-
-document.addEventListener("keydown", (e) => {
-  if (isLocked) return;
-
-  if (e.key === "ArrowUp") y -= speed;
-  if (e.key === "ArrowDown") y += speed;
-  if (e.key === "ArrowLeft") x -= speed;
-  if (e.key === "ArrowRight") x += speed;
-
-  x = Math.max(0, Math.min(280, x));
-  y = Math.max(0, Math.min(280, y));
-});
-
-gameLoop();
-</script>
-
+<script type="module" src="js/main.js"></script>
 </body>
 </html>
