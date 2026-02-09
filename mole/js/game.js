@@ -1,66 +1,73 @@
-const board = document.getElementById("gameBoard");
+import { saveScore } from "./leaderboard.js";
+
+const mole = document.getElementById("mole");
 const scoreEl = document.getElementById("score");
-const comboEl = document.getElementById("combo");
-const timeEl = document.getElementById("time");
+const fx = document.getElementById("fx");
+const ctx = fx.getContext("2d");
+
+fx.width = window.innerWidth;
+fx.height = 320;
 
 let score = 0;
-let combo = 0;
-let time = 10;
-let playing = false;
+let speed = 1200;
+let visible = false;
 
-for (let i = 0; i < 9; i++) {
-  const hole = document.createElement("div");
-  hole.className = "hole";
-
-  const mole = document.createElement("div");
-  mole.className = "mole";
-  mole.innerHTML = `
-    <div class="face">
-      <div class="eye left"></div>
-      <div class="eye right"></div>
-      <div class="nose"></div>
-    </div>
-  `;
-
-  hole.appendChild(mole);
-  board.appendChild(hole);
-
-  hole.onclick = () => {
-    if (!mole.classList.contains("show")) return;
-    score += 100 + combo * 20;
-    combo++;
-    scoreEl.textContent = score;
-    comboEl.textContent = combo;
-    mole.classList.remove("show");
-  };
+function updateScore() {
+  scoreEl.textContent = `Score : ${score}`;
 }
 
-function popMole() {
-  if (!playing) return;
-  const moles = document.querySelectorAll(".mole");
-  const mole = moles[Math.floor(Math.random() * moles.length)];
+function showMole() {
+  visible = true;
   mole.classList.add("show");
-  setTimeout(() => mole.classList.remove("show"), 700);
+
+  setTimeout(() => {
+    visible = false;
+    mole.classList.remove("show");
+  }, speed * 0.6);
 }
 
-export function startGame() {
-  playing = true;
-  score = 0;
-  combo = 0;
-  time = 10;
-
-  scoreEl.textContent = 0;
-  comboEl.textContent = 0;
-  timeEl.textContent = time;
-
-  const timer = setInterval(() => {
-    time--;
-    timeEl.textContent = time;
-    if (time <= 0) {
-      playing = false;
-      clearInterval(timer);
-    }
-  }, 1000);
-
-  setInterval(popMole, 600);
+function loop() {
+  showMole();
+  speed = Math.max(350, speed - 40); // 점점 빨라짐
+  setTimeout(loop, speed);
 }
+
+mole.addEventListener("click", (e) => {
+  if (!visible) return;
+
+  score++;
+  updateScore();
+  visible = false;
+  mole.classList.remove("show");
+  firework(e.clientX, e.clientY);
+});
+
+setInterval(() => {
+  if (score > 0) {
+    score--;
+    updateScore();
+  }
+}, 1000);
+
+function firework(x, y) {
+  for (let i = 0; i < 12; i++) {
+    ctx.fillStyle = "rgba(255,215,0,0.8)";
+    ctx.beginPath();
+    ctx.arc(
+      x + Math.cos(i) * 12,
+      y + Math.sin(i) * 12,
+      2,
+      0,
+      Math.PI * 2
+    );
+    ctx.fill();
+  }
+
+  setTimeout(() => ctx.clearRect(0, 0, fx.width, fx.height), 200);
+}
+
+loop();
+
+window.addEventListener("beforeunload", () => {
+  saveScore(score);
+});
