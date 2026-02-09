@@ -1,31 +1,12 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-  <meta charset="UTF-8" />
-  <title>두더지 잡기</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="stylesheet" href="css/style.css" />
-</head>
-<body>
-
-<div class="hud">
-  <div>
-    점수: <span id="score">0</span><br>
-    콤보: <span id="combo">0</span>
+<div class="leaderboard-wrap">
+  <div class="lb-header">
+    <img src="duck.png" class="lb-icon">
+    <div class="lb-title">덕질코리아 Duckko</div>
+    <div class="lb-tabs">
+      <button class="active">전체 순위</button>
+      <button disabled>월간 순위</button>
+    </div>
   </div>
-  <div class="right">
-    남은 시간: <span id="time">10</span><br>
-    최대 점수: <span id="bestScore">0</span>
-  </div>
+
+  <div id="leaderboard"></div>
 </div>
-
-<div id="gameBoard"></div>
-
-<div class="leaderboard-box">
-  <h3>🏆 리더보드 (Top 10)</h3>
-  <div id="leaderboard">불러오는 중...</div>
-</div>
-
-<script type="module" src="js/main.js"></script>
-</body>
-</html>
