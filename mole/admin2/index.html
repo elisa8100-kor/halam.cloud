@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Leaderboard 관리자</title>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont;
+      background: #0f1320;
+      color: #eaeaf0;
+    }
+    .wrap {
+      max-width: 1000px;
+      margin: auto;
+      padding: 20px;
+    }
+    h2 { margin-bottom: 12px; }
+    .card {
+      background: rgba(255,255,255,.05);
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 14px;
+      padding: 14px;
+      margin-bottom: 16px;
+    }
+    .row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    input, button {
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,.15);
+      background: rgba(0,0,0,.25);
+      color: #eaeaf0;
+    }
+    button {
+      cursor: pointer;
+      background: #273150;
+      font-weight: 700;
+    }
+    button:hover { filter: brightness(1.08); }
+    .danger {
+      background: rgba(184,59,59,.25);
+      border-color: rgba(184,59,59,.6);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+    }
+    th, td {
+      padding: 10px 8px;
+      border-bottom: 1px solid rgba(255,255,255,.12);
+      text-align: left;
+    }
+    th { font-size: 12px; opacity: .7; }
+    .right { text-align: right; }
+    .mono {
+      font-family: ui-monospace, Consolas, monospace;
+      font-size: 12px;
+      opacity: .7;
+    }
+    .msg {
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 10px;
+      background: rgba(0,0,0,.25);
+      border: 1px solid rgba(255,255,255,.15);
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+
+<body>
+<div class="wrap">
+  <h2>🏁 Leaderboard 관리자</h2>
+
+  <!-- 관리자 비밀번호 -->
+  <div class="card">
+    <div class="mono">관리자 비밀번호</div>
+    <div class="row">
+      <input id="pw" type="password" placeholder="비밀번호 입력" />
+      <button id="loadBtn">목록 불러오기</button>
+    </div>
+    <div id="msg" class="msg" style="display:none"></div>
+  </div>
+
+  <!-- 추가 -->
+  <div class="card">
+    <h3>➕ 랭킹 추가</h3>
+    <div class="row">
+      <input id="name" placeholder="이름" />
+      <input id="score" type="number" placeholder="점수" />
+      <input id="max_combo" type="number" placeholder="최대 콤보" />
+    </div>
+    <div class="row" style="margin-top:10px">
+      <button id="addBtn">추가</button>
+      <button id="resetBtn">초기화</button>
+    </div>
+  </div>
+
+  <!-- 목록 -->
+  <div class="card">
+    <h3>📋 랭킹 목록</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>순위</th>
+          <th>이름</th>
+          <th class="right">점수</th>
+          <th class="right">콤보</th>
+          <th>시간</th>
+          <th class="right">삭제</th>
+        </tr>
+      </thead>
+      <tbody id="tbody">
+        <tr><td colspan="6" class="mono">불러오기 전</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script type="module">
+  import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+  /* ================= 설정 ================= */
+  const SUPABASE_URL = "https://oykepnxnbyltcvcqnfbe.supabase.co";
+  const SUPABASE_ANON_KEY = "sb_publishable_85W1hHMVmhILGBbrX-l4wg_qmLCn987";
+  const ADMIN_PASSWORD = "halam0202";
+  /* ======================================== */
+
+  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  const pwEl = document.getElementById("pw");
+  const nameEl = document.getElementById("name");
+  const scoreEl = document.getElementById("score");
+  const maxComboEl = document.getElementById("max_combo");
+  const tbody = document.getElementById("tbody");
+  const msg = document.getElementById("msg");
+
+  let rows = [];
+
+  function show(text) {
+    msg.style.display = text ? "block" : "none";
+    msg.textContent = text || "";
+  }
+
+  function checkAdmin() {
+    if (pwEl.value !== ADMIN_PASSWORD) {
+      alert("관리자 비밀번호가 틀렸어!");
+      return false;
+    }
+    return true;
+  }
+
+  async function load() {
+    const { data, error } = await supabase
+      .from("leaderboard")
+      .select("id, created_at, name, score, max_combo")
+      .order("score", { ascending: false })
+      .order("max_combo", { ascending: false })
+      .order("created_at", { ascending: true });
+
+    if (error) {
+      show("불러오기 실패: " + error.message);
+      return;
+    }
+
+    rows = data;
+    render();
+  }
+
+  function render() {
+    tbody.innerHTML = rows.map((r, i) => `
+      <tr>
+        <td>${i + 1}</td>
+        <td>
+          <div>${r.name}</div>
+          <div class="mono">${r.id}</div>
+        </td>
+        <td class="right">${r.score}</td>
+        <td class="right">${r.max_combo}</td>
+        <td class="mono">${new Date(r.created_at).toLocaleString()}</td>
+        <td class="right">
+          <button class="danger" data-id="${r.id}">삭제</button>
+        </td>
+      </tr>
+    `).join("");
+
+    tbody.querySelectorAll("button").forEach(btn => {
+      btn.onclick = () => del(btn.dataset.id);
+    });
+  }
+
+  async function addRow() {
+    if (!checkAdmin()) return;
+
+    const name = nameEl.value.trim();
+    const score = Number(scoreEl.value);
+    const max_combo = Number(maxComboEl.value);
+
+    if (!name || !Number.isFinite(score) || !Number.isFinite(max_combo)) {
+      alert("입력값을 확인해줘!");
+      return;
+    }
+
+    const { error } = await supabase
+      .from("leaderboard")
+      .insert([{ name, score, max_combo }]);
+
+    if (error) {
+      show("추가 실패: " + error.message);
+      return;
+    }
+
+    show("추가 완료!");
+    nameEl.value = scoreEl.value = maxComboEl.value = "";
+    load();
+  }
+
+  async function del(id) {
+    if (!checkAdmin()) return;
+    if (!confirm("정말 삭제할까?")) return;
+
+    const { error } = await supabase
+      .from("leaderboard")
+      .delete()
+      .eq("id", id);
+
+    if (error) {
+      show("삭제 실패: " + error.message);
+      return;
+    }
+
+    show("삭제 완료!");
+    load();
+  }
+
+  document.getElementById("loadBtn").onclick = load;
+  document.getElementById("addBtn").onclick = addRow;
+  document.getElementById("resetBtn").onclick = () => {
+    nameEl.value = scoreEl.value = maxComboEl.value = "";
+  };
+</script>
+</body>
+</html>
