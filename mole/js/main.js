@@ -1,25 +1,11 @@
-import { createGame, STATE_PLAY } from "./game.js";
-import { refreshLeaderboard, saveScore } from "./leaderboard.js";
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+import { startGame } from "./game.js";
+import { loadLeaderboard } from "./leaderboard.js";
 
-const ACCESS_PASSWORD = "halam0202";
+export const supabase = createClient(
+  "https://oykepnxnbyltcvcqnfbe.supabase.co",
+  "sb_publishable_85W1hHMVmhILGBbrX-l4wg_qmLCn987"
+);
 
-const pwOverlay = document.getElementById("pwOverlay");
-const pwInput = document.getElementById("pwInput");
-const pwSubmit = document.getElementById("pwSubmit");
-const pwMsg = document.getElementById("pwMsg");
-
-pwSubmit.onclick = async ()=>{
-  if(pwInput.value === ACCESS_PASSWORD){
-    pwOverlay.style.display = "none";
-    await refreshLeaderboard();
-  }else{
-    pwMsg.textContent = "비밀번호 틀림";
-  }
-};
-
-const canvas = document.getElementById("game");
-const { game } = createGame(canvas);
-
-document.getElementById("btnStart").onclick = ()=>{
-  game.state = STATE_PLAY;
-};
+startGame();
+loadLeaderboard();
