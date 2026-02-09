@@ -1,107 +1,43 @@
-
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>관리자</title>
-
-<style>
-body{
-  margin:0;
-  font-family:system-ui;
-  background:#0f1320;
-  color:#fff;
-}
-.center{
-  min-height:100vh;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
-.card{
-  background:rgba(255,255,255,.06);
-  border:1px solid rgba(255,255,255,.15);
-  border-radius:18px;
-  padding:28px;
-  width:100%;
-  max-width:420px;
-}
-h2{margin-top:0}
-input,button{
-  width:100%;
-  padding:12px;
-  margin-top:10px;
-  border-radius:12px;
-  border:1px solid rgba(255,255,255,.25);
-  background:rgba(0,0,0,.25);
-  color:#fff;
-  font-size:15px;
-}
-button{
-  cursor:pointer;
-  font-weight:700;
-}
-.lock{background:#922}
-.unlock{background:#296}
-.status{
-  margin-top:15px;
-  padding:12px;
-  border-radius:12px;
-  background:rgba(0,0,0,.25);
-  text-align:center;
-  font-weight:700;
-}
-</style>
+  <meta charset="UTF-8">
+  <title>관리자 페이지</title>
 </head>
-
 <body>
-<div class="center">
-  <div class="card">
-    <h2>🛠 관리자</h2>
 
-    <input id="pw" type="password" placeholder="관리자 비밀번호">
+<h1>🔧 사이트 잠금 관리</h1>
+<button id="lockBtn">🔒 잠그기</button>
+<button id="unlockBtn">🔓 열기</button>
 
-    <button id="toggleBtn"></button>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+  import { getFirestore, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    <div id="status" class="status"></div>
-  </div>
-</div>
+  const firebaseConfig = {
+    apiKey: "AIzaSyBlhU1NVqceV0zYtgSaDF1Q22DebLVlT7E",
+    authDomain: "mole-71eed.firebaseapp.com",
+    projectId: "mole-71eed",
+    storageBucket: "mole-71eed.appspot.com",
+    messagingSenderId: "770752185372",
+    appId: "1:770752185372:web:44c462f2021f6752750bd9"
+  };
 
-<script>
-const ADMIN_PW = "halam0202";
-const LOCK_KEY = "site_locked";
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
 
-const pw = document.getElementById("pw");
-const toggleBtn = document.getElementById("toggleBtn");
-const statusEl = document.getElementById("status");
+  const lockRef = doc(db, "site", "lock");
 
-function isLocked(){
-  return localStorage.getItem(LOCK_KEY) === "1";
-}
+  document.getElementById("lockBtn").onclick = async () => {
+    await updateDoc(lockRef, { locked: true });
+    alert("사이트 잠김");
+  };
 
-function render(){
-  if(isLocked()){
-    toggleBtn.textContent = "🔓 메인 사이트 열기";
-    toggleBtn.className = "unlock";
-    statusEl.textContent = "현재 상태: 🔒 메인 사이트 잠김";
-  }else{
-    toggleBtn.textContent = "🔒 메인 사이트 잠그기";
-    toggleBtn.className = "lock";
-    statusEl.textContent = "현재 상태: 🔓 메인 사이트 열림";
-  }
-}
-
-toggleBtn.onclick = ()=>{
-  if(pw.value !== ADMIN_PW){
-    alert("비밀번호가 틀렸어");
-    return;
-  }
-  localStorage.setItem(LOCK_KEY, isLocked() ? "0" : "1");
-  render();
-};
-
-render();
+  document.getElementById("unlockBtn").onclick = async () => {
+    await updateDoc(lockRef, { locked: false });
+    alert("사이트 열림");
+  };
 </script>
+
 </body>
 </html>
