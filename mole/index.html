@@ -1,56 +1,130 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
-  <title>두더지 잡기 게임(Made By Halam)</title>
-  <link rel="stylesheet" href="./css/style.css" />
+<meta charset="UTF-8" />
+<title>LOCKED GAME</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<style>
+  body {
+    margin: 0;
+    background: #111;
+    color: #fff;
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+
+  #game {
+    text-align: center;
+  }
+
+  canvas {
+    background: #000;
+    border: 3px solid #555;
+  }
+
+  #lockScreen {
+    position: fixed;
+    inset: 0;
+    background: black;
+    color: white;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    z-index: 9999;
+  }
+</style>
 </head>
+
 <body>
-  <div class="wrap">
-    <canvas id="game" width="640" height="720" aria-label="두더지 잡기 게임 캔버스" role="img"></canvas>
 
-    <div class="panel">
-      <h2>🏆 리더보드 (Top 10)</h2>
-      <h5>보완 및 개선등 문의는 halamcloud@gmail.com으로 부탁드립니다.<br/>
-      게임 개발도 추천받습니다!!!</h5>
-      <table class="board">
-        <thead>
-          <tr><th>#</th><th>닉네임</th><th>점수</th><th>최대 콤보</th><th>날짜</th></tr>
-        </thead>
-        <tbody id="board-body">
-          <tr><td colspan="5">불러오는 중입니다…</td></tr>
-        </tbody>
-      </table>
-      <div class="muted">
-      보완 및 개선등 문의는 halamcloud@gmail.com으로 부탁드립니다.<br/>
-        게임 오버 후 Top 10에 들면 닉네임을 입력해 저장할 수 있습니다.</div>
-    </div>
-  </div>
+<div id="lockScreen">🔒 현재 사이트가 잠겨 있습니다</div>
 
-  <div class="hudbar">
-    <button id="btnStart">시작</button>
-    <button id="btnPause">일시정지</button>
-    <button id="btnRestart">재시작</button>
-  </div>
+<div id="game">
+  <h1>게임 화면</h1>
+  <canvas id="canvas" width="300" height="300"></canvas>
+  <p>방향키로 움직이세요</p>
+</div>
 
-  <div class="hint" id="hint">
-    Space 시작 · (모바일) 화면 터치로 타격 · P 일시정지 · R 재시작
-  </div>
-  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script type="module">
+/* =========================
+   🔐 Firebase 잠금 시스템
+========================= */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-  <div class="overlay" id="nameOverlay" role="dialog" aria-modal="true">
-    <div class="dialog">
-      <h3>Top 10에 진입했습니다</h3>
-      <p>리더보드에 표시할 닉네임을 입력해주세요. (2~12자, 한글/영문/숫자/공백/_/-)</p>
-      <div class="row">
-        <input type="text" id="nickname" placeholder="닉네임" maxlength="12" autocomplete="off" />
-        <button id="submitName">저장</button>
-        <button class="danger" id="cancelName">취소</button>
-      </div>
-    </div>
-  </div>
+const firebaseConfig = {
+  apiKey: "AIzaSyBlhU1NVqceV0zYtgSaDF1Q22DebLVlT7E",
+  authDomain: "mole-71eed.firebaseapp.com",
+  projectId: "mole-71eed",
+  storageBucket: "mole-71eed.appspot.com",
+  messagingSenderId: "770752185372",
+  appId: "1:770752185372:web:44c462f2021f6752750bd9"
+};
 
-  <script type="module" src="./js/main.js"></script>
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const lockRef = doc(db, "site", "lock");
+const lockScreen = document.getElementById("lockScreen");
+const gameDiv = document.getElementById("game");
+
+let isLocked = false;
+
+onSnapshot(lockRef, (snap) => {
+  if (snap.exists() && snap.data().locked === true) {
+    isLocked = true;
+    lockScreen.style.display = "flex";
+    gameDiv.style.display = "none";
+  } else {
+    isLocked = false;
+    lockScreen.style.display = "none";
+    gameDiv.style.display = "block";
+    requestAnimationFrame(gameLoop);
+  }
+});
+
+/* =========================
+   🎮 게임 로직
+========================= */
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+
+let x = 140;
+let y = 140;
+const size = 20;
+const speed = 4;
+
+function draw() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = "lime";
+  ctx.fillRect(x, y, size, size);
+}
+
+function gameLoop() {
+  if (isLocked) return;
+  draw();
+  requestAnimationFrame(gameLoop);
+}
+
+document.addEventListener("keydown", (e) => {
+  if (isLocked) return;
+
+  if (e.key === "ArrowUp") y -= speed;
+  if (e.key === "ArrowDown") y += speed;
+  if (e.key === "ArrowLeft") x -= speed;
+  if (e.key === "ArrowRight") x += speed;
+
+  x = Math.max(0, Math.min(280, x));
+  y = Math.max(0, Math.min(280, y));
+});
+
+gameLoop();
+</script>
+
 </body>
 </html>
