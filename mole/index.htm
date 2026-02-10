@@ -1,20 +1,27 @@
-const KEY = "MOLE_RANK";
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>두더지 잡기</title>
 
-export function loadLeaderboard() {
-  const list = document.getElementById("rankList");
-  list.innerHTML = "";
+  <!-- ⚠️ 절대 경로 주의 -->
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
 
-  const data = JSON.parse(localStorage.getItem(KEY)) || [];
-  data.slice(0, 20).forEach((s, i) => {
-    const li = document.createElement("li");
-    li.textContent = `${i + 1}위 - ${s}점`;
-    list.appendChild(li);
-  });
-}
+  <h1>두더지 잡기</h1>
 
-export function saveScore(score) {
-  let data = JSON.parse(localStorage.getItem(KEY)) || [];
-  data.push(score);
-  data.sort((a, b) => b - a);
-  localStorage.setItem(KEY, JSON.stringify(data.slice(0, 20)));
-}
+  <canvas id="game" width="360" height="360"></canvas>
+
+  <div id="ui">
+    <input id="nickname" placeholder="닉네임 입력" />
+    <button id="saveBtn">점수 저장</button>
+    <p id="msg"></p>
+  </div>
+
+  <ul id="rankList"></ul>
+
+  <!-- ⚠️ module 필수 -->
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
