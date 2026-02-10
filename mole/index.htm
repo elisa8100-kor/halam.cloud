@@ -1,27 +1,30 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>두더지 잡기</title>
-
-  <!-- ⚠️ 절대 경로 주의 -->
-  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
-  <h1>두더지 잡기</h1>
+<h1>MOLE GAME</h1>
 
-  <canvas id="game" width="360" height="360"></canvas>
-
-  <div id="ui">
-    <input id="nickname" placeholder="닉네임 입력" />
-    <button id="saveBtn">점수 저장</button>
-    <p id="msg"></p>
+<div id="game">
+  <div id="hole">
+    <div id="mole">
+      <div class="eye left"></div>
+      <div class="eye right"></div>
+      <div class="nose"></div>
+    </div>
   </div>
+</div>
 
-  <ul id="rankList"></ul>
+<div id="hud">
+  <span>점수 <b id="score">0</b></span>
+  <span>콤보 <b id="combo">0</b></span>
+  <span>시간 <b id="time">30</b></span>
+</div>
 
-  <!-- ⚠️ module 필수 -->
-  <script type="module" src="js/main.js"></script>
+<script type="module" src="js/main.js"></script>
 </body>
 </html>
