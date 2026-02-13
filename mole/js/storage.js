@@ -1,4 +1,3 @@
-// /js/storage.js
 const HS_KEY = "wam_high_score_v1";
 
 export function getHighScore() {
