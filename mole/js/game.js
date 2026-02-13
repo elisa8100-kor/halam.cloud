@@ -24,46 +24,6 @@ function font(px) {
   return `${px}px system-ui,-apple-system,"Pretendard","Malgun Gothic",sans-serif`;
 }
 
-class Sfx {
-  constructor() {
-    this.ok = false;
-    this.ctx = null;
-    this.master = null;
-  }
-  ensure() {
-    if (this.ok) return true;
-    try {
-      const AC = window.AudioContext || window.webkitAudioContext;
-      if (!AC) return false;
-      this.ctx = new AC();
-      this.master = this.ctx.createGain();
-      this.master.gain.value = 0.14;
-      this.master.connect(this.ctx.destination);
-      this.ok = true;
-      return true;
-    } catch {
-      return false;
-    }
-  }
-  ping(freq, dur, type) {
-    if (!this.ensure()) return;
-    const t0 = this.ctx.currentTime;
-    const o = this.ctx.createOscillator();
-    const g = this.ctx.createGain();
-    o.type = type || "triangle";
-    o.frequency.setValueAtTime(freq, t0);
-    g.gain.setValueAtTime(0.0001, t0);
-    g.gain.exponentialRampToValueAtTime(0.35, t0 + 0.01);
-    g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
-    o.connect(g);
-    g.connect(this.master);
-    o.start(t0);
-    o.stop(t0 + dur + 0.02);
-  }
-  hit() { this.ping(520, 0.08, "triangle"); }
-  miss() { this.ping(180, 0.10, "sine"); }
-}
-
 class Particle {
   constructor() { this.active = false; }
   init(x, y, color) {
@@ -100,12 +60,12 @@ class Particle {
 }
 
 class ParticlePool {
-  constructor(cap = 300) {
+  constructor(cap = 320) {
     this.pool = Array.from({ length: cap }, () => new Particle());
     this.cursor = 0;
     this.palette = [COLORS.ACCENT, COLORS.RED, "rgba(234,240,255,.95)"];
   }
-  burst(x, y, count = 20) {
+  burst(x, y, count = 22) {
     for (let i = 0; i < count; i++) {
       const p = this.pool[this.cursor];
       this.cursor = (this.cursor + 1) % this.pool.length;
@@ -190,7 +150,7 @@ class FloatText {
 }
 
 class FloatTextPool {
-  constructor(cap = 60) {
+  constructor(cap = 70) {
     this.pool = Array.from({ length: cap }, () => new FloatText());
     this.cursor = 0;
   }
@@ -343,7 +303,6 @@ export function createGame(canvas, { onGameOver = () => {}, toast = () => {} } =
   const particles = new ParticlePool(320);
   const rings = new RingPool(40);
   const floats = new FloatTextPool(70);
-  const sfx = new Sfx();
 
   let state = "menu";
   let score = 0;
@@ -359,7 +318,6 @@ export function createGame(canvas, { onGameOver = () => {}, toast = () => {} } =
   let visibleSec = 0.80;
 
   let countdownT = 0;
-  let inputLockT = 0;
 
   let shakeT = 0;
   let shakePower = 0;
@@ -380,21 +338,8 @@ export function createGame(canvas, { onGameOver = () => {}, toast = () => {} } =
     pointer.isTouch = (e.pointerType === "touch");
     canvas.setPointerCapture?.(e.pointerId);
     updatePointer(e);
-    pointer.just = true;
-    sfx.ensure();
-    if (state === "menu") start();
+    if (state === "play") pointer.just = true;
   }, { passive: false });
-
-  window.addEventListener("keydown", (e) => {
-    if (e.code === "Space" && state === "menu") start();
-    if (e.code === "KeyP") {
-      if (state === "play") pause();
-      else if (state === "pause") resume();
-    }
-    if (e.code === "KeyR") {
-      if (state === "play" || state === "pause" || state === "over") restart();
-    }
-  });
 
   function resetCore() {
     score = 0;
@@ -407,7 +352,6 @@ export function createGame(canvas, { onGameOver = () => {}, toast = () => {} } =
     visibleSec = 0.80;
 
     countdownT = 0;
-    inputLockT = 0;
     shakeT = 0;
     shakePower = 0;
 
@@ -421,24 +365,6 @@ export function createGame(canvas, { onGameOver = () => {}, toast = () => {} } =
     toast("준비!");
   }
 
-  function pause() {
-    if (state !== "play") return;
-    state = "pause";
-    for (const m of moles) m.hideNow();
-    inputLockT = 0.28;
-    spawnTimer = 0;
-    toast("일시정지");
-  }
-
-  function resume() {
-    if (state !== "pause") return;
-    state = "play";
-    for (const m of moles) m.hideNow();
-    inputLockT = 0.28;
-    spawnTimer = -0.15;
-    toast("재개");
-  }
-
   function restart() {
     resetCore();
     state = "countdown";
@@ -448,12 +374,11 @@ export function createGame(canvas, { onGameOver = () => {}, toast = () => {} } =
 
   function gameOver() {
     state = "over";
-    const prevHigh = highScore;
     if (score > highScore) {
       highScore = score;
       setHighScore(highScore);
     }
-    onGameOver(score, maxCombo, prevHigh);
+    onGameOver(score, maxCombo);
   }
 
   function difficultyUpdate() {
@@ -481,8 +406,6 @@ export function createGame(canvas, { onGameOver = () => {}, toast = () => {} } =
   }
 
   function handleHit() {
-    if (inputLockT > 0) return;
-
     let hit = false;
     const touchBonus = pointer.isTouch ? 1.23 : 1.0;
 
@@ -500,7 +423,6 @@ export function createGame(canvas, { onGameOver = () => {}, toast = () => {} } =
         floats.pop(m.cx, m.cy - 44, `+${gain}`, COLORS.ACCENT);
 
         shake(6);
-        sfx.hit();
         break;
       }
     }
@@ -511,7 +433,6 @@ export function createGame(canvas, { onGameOver = () => {}, toast = () => {} } =
       combo = 0;
       floats.pop(pointer.x, pointer.y - 10, `MISS`, COLORS.RED);
       shake(4);
-      sfx.miss();
     }
   }
 
@@ -604,7 +525,6 @@ export function createGame(canvas, { onGameOver = () => {}, toast = () => {} } =
     last = now;
 
     if (shakeT > 0) shakeT = Math.max(0, shakeT - dt);
-    if (inputLockT > 0) inputLockT = Math.max(0, inputLockT - dt);
 
     if (state === "countdown") {
       countdownT -= dt;
@@ -661,11 +581,8 @@ export function createGame(canvas, { onGameOver = () => {}, toast = () => {} } =
 
     if (state === "menu") {
       drawCenter("두더지 잡기", "Space 또는 시작 버튼으로 시작");
-    } else if (state === "pause") {
-      drawCenter("일시정지", "P 또는 일시정지 버튼으로 재개");
     } else if (state === "over") {
-      const badge = score >= highScore ? "최고점 갱신!" : "";
-      drawCenter("게임 오버", "R 또는 재시작 버튼으로 다시 시작", `최종 ${score}점 · 최대 콤보 ${maxCombo} ${badge ? "· " + badge : ""}`);
+      drawCenter("게임 오버", "R 또는 재시작 버튼으로 다시 시작", `최종 ${score}점 · 최대 콤보 ${maxCombo}`);
     } else if (state === "countdown") {
       drawCountdown();
     }
@@ -676,8 +593,6 @@ export function createGame(canvas, { onGameOver = () => {}, toast = () => {} } =
 
   return {
     start,
-    pause,
-    resume,
     restart,
     getState: () => state,
     getScore: () => score,
