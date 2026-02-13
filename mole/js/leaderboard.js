@@ -3,7 +3,7 @@ const SUPABASE_ANON_KEY = "sb_publishable_85W1hHMVmhILGBbrX-l4wg_qmLCn987";
 
 const boardBody = document.getElementById("board-body");
 
-const LB_CACHE_KEY = "wam_leaderboard_cache_v2";
+const LB_CACHE_KEY = "wam_leaderboard_cache_v3";
 const CACHE_TTL_MS = 2 * 60 * 1000;
 const SUBMIT_COOLDOWN_MS = 15 * 1000;
 const LAST_SUBMIT_KEY = "wam_last_submit_at_v1";
@@ -150,4 +150,4 @@ export async function saveScore(name, score, maxCombo) {
 
   markSubmitted();
   localStorage.removeItem(LB_CACHE_KEY);
-      }
+}
