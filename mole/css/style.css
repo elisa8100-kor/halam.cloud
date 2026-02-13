@@ -1,192 +1,56 @@
-:root{
-  --bg:#0b0f1a;
-  --hole:#0c1020;
-  --mole:#d25f5f;
-  --mole-shadow:#7b3535;
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <title>두더지 잡기 게임(Made By Halam)</title>
+  <link rel="stylesheet" href="./css/style.css" />
+</head>
+<body>
+  <div class="wrap">
+    <canvas id="game" width="640" height="720" aria-label="두더지 잡기 게임 캔버스" role="img"></canvas>
 
-  --hud:#eaf0ff;
-  --red:#ff6b6b;
-  --accent:#ffd974;
+    <div class="panel">
+      <h2>🏆 리더보드 (Top 10)</h2>
+      <h5>보완 및 개선등 문의는 halamcloud@gmail.com으로 부탁드립니다.<br/>
+      게임 개발도 추천받습니다!!!</h5>
+      <table class="board">
+        <thead>
+          <tr><th>#</th><th>닉네임</th><th>점수</th><th>최대 콤보</th><th>날짜</th></tr>
+        </thead>
+        <tbody id="board-body">
+          <tr><td colspan="5">불러오는 중입니다…</td></tr>
+        </tbody>
+      </table>
+      <div class="muted">
+        보완 및 개선등 문의는 halamcloud@gmail.com으로 부탁드립니다.<br/>
+        게임 오버 후 Top 10에 들면 닉네임을 입력해 저장할 수 있습니다.
+      </div>
+    </div>
+  </div>
 
-  --panel:#0f1626;
-  --panel2:#121a2a;
-  --line: rgba(255,255,255,.12);
-  --muted: rgba(234,240,255,.70);
+  <div class="hudbar">
+    <button id="btnStart">시작</button>
+    <button id="btnRestart">재시작</button>
+  </div>
 
-  --btn:#1b2540;
-  --btnHover:#243154;
-  --shadow: rgba(0,0,0,.45);
-}
+  <div class="hint" id="hint">
+    Space 시작 · (모바일) 터치로 타격 · R 재시작
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-*{ box-sizing:border-box; }
-html,body{ height:100%; }
+  <div class="overlay" id="nameOverlay" role="dialog" aria-modal="true">
+    <div class="dialog">
+      <h3>Top 10에 진입했습니다</h3>
+      <p>리더보드에 표시할 닉네임을 입력해주세요. (2~12자, 한글/영문/숫자/공백/_/-)</p>
+      <div class="row">
+        <input type="text" id="nickname" placeholder="닉네임" maxlength="12" autocomplete="off" />
+        <button id="submitName">저장</button>
+        <button class="danger" id="cancelName">취소</button>
+      </div>
+    </div>
+  </div>
 
-body{
-  margin:0;
-  color:var(--hud);
-  background:
-    radial-gradient(1200px 800px at 50% 10%, rgba(90,120,255,.12), transparent 55%),
-    radial-gradient(900px 650px at 20% 70%, rgba(255,217,116,.10), transparent 55%),
-    linear-gradient(180deg, #070a12, var(--bg) 55%, #070a12);
-  font-family: system-ui, -apple-system, "Pretendard", "Malgun Gothic", sans-serif;
-}
-
-/* Layout */
-.wrap{
-  max-width: 1180px;
-  margin: 0 auto;
-  padding: 18px 16px 96px;
-  display:grid;
-  grid-template-columns: 1fr 420px;
-  gap: 16px;
-}
-
-@media (max-width: 980px){
-  .wrap{ grid-template-columns: 1fr; }
-}
-
-/* Canvas */
-#game{
-  width: 100%;
-  height: auto;
-  border-radius: 18px;
-  background:
-    radial-gradient(900px 520px at 50% 10%, rgba(255,255,255,.05), transparent 60%),
-    linear-gradient(180deg, #0a1020, #0a0f1d);
-  border: 1px solid var(--line);
-  box-shadow: 0 18px 50px var(--shadow);
-  touch-action: none; /* 모바일 터치 딜레이 방지 */
-}
-
-/* Panel */
-.panel{
-  border: 1px solid var(--line);
-  background: linear-gradient(180deg, rgba(18,26,42,.75), rgba(15,22,38,.75));
-  border-radius: 18px;
-  padding: 14px 14px 16px;
-  box-shadow: 0 18px 50px var(--shadow);
-  backdrop-filter: blur(8px);
-}
-
-.panel h2{
-  margin: 6px 0 2px;
-  font-size: 18px;
-}
-.panel h5{
-  margin: 6px 0 12px;
-  font-weight: 500;
-  line-height: 1.35;
-  color: var(--muted);
-}
-
-.board{
-  width:100%;
-  border-collapse: collapse;
-  overflow: hidden;
-  border-radius: 12px;
-  border: 1px solid var(--line);
-  background: rgba(0,0,0,.12);
-}
-
-.board th, .board td{
-  padding: 9px 8px;
-  font-size: 13px;
-  text-align: center;
-  border-bottom: 1px solid rgba(255,255,255,.08);
-}
-
-.board thead th{
-  font-size: 12px;
-  color: rgba(234,240,255,.85);
-  background: rgba(255,255,255,.06);
-  position: sticky;
-  top: 0;
-}
-
-.board tbody tr:hover{
-  background: rgba(255,255,255,.06);
-}
-
-.muted{
-  margin-top: 10px;
-  font-size: 12px;
-  line-height: 1.4;
-  color: var(--muted);
-}
-
-/* Bottom HUD bar */
-.hudbar{
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  display:flex;
-  justify-content:center;
-  gap: 10px;
-  padding: 12px 12px;
-  background: rgba(10,14,26,.72);
-  border-top: 1px solid var(--line);
-  backdrop-filter: blur(10px);
-  z-index: 10;
-}
-
-button{
-  appearance:none;
-  border: 1px solid var(--line);
-  background: linear-gradient(180deg, var(--btn), #121a2a);
-  color: var(--hud);
-  padding: 10px 14px;
-  border-radius: 12px;
-  font-weight: 700;
-  cursor: pointer;
-  box-shadow: 0 10px 25px rgba(0,0,0,.35);
-  transition: transform .08s ease, background .12s ease;
-}
-button:hover{ background: linear-gradient(180deg, var(--btnHover), #141e33); }
-button:active{ transform: translateY(1px); }
-button.danger{
-  border-color: rgba(255,107,107,.35);
-  background: linear-gradient(180deg, rgba(255,107,107,.28), rgba(18,26,42,.90));
-}
-
-/* Hint */
-.hint{
-  position: fixed;
-  left: 50%;
-  transform: translateX(-50%);
-  bottom: 62px;
-  font-size: 12px;
-  color: var(--muted);
-  background: rgba(0,0,0,.20);
-  border: 1px solid rgba(255,255,255,.10);
-  padding: 8px 10px;
-  border-radius: 12px;
-  backdrop-filter: blur(8px);
-  z-index: 10;
-}
-
-/* Toast */
-.toast{
-  position: fixed;
-  left: 50%;
-  transform: translateX(-50%) translateY(10px);
-  bottom: 104px;
-  opacity: 0;
-  pointer-events: none;
-  padding: 10px 12px;
-  border-radius: 12px;
-  background: rgba(0,0,0,.55);
-  border: 1px solid rgba(255,255,255,.12);
-  color: var(--hud);
-  font-size: 13px;
-  transition: opacity .16s ease, transform .16s ease;
-  z-index: 30;
-}
-.toast.show{
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
-}
-
-/* Overlay */
-.overlay{
-  pos
+  <script type="module" src="./js/main.js"></script>
+</body>
+</html>
