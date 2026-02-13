@@ -8,21 +8,17 @@ import {
 } from "./leaderboard.js";
 
 const canvas = document.getElementById("game");
-
 const btnStart = document.getElementById("btnStart");
-const btnPause = document.getElementById("btnPause");
 const btnRestart = document.getElementById("btnRestart");
 
 const toastEl = document.getElementById("toast");
 let toastTimer = null;
 function showToast(msg, ms = 2200) {
-  if (!toastEl) return;
   toastEl.textContent = msg;
   toastEl.classList.add("show");
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => toastEl.classList.remove("show"), ms);
 }
-window.__showToast = showToast;
 
 const overlay = document.getElementById("nameOverlay");
 const nicknameInput = document.getElementById("nickname");
@@ -30,24 +26,34 @@ const submitNameBtn = document.getElementById("submitName");
 const cancelNameBtn = document.getElementById("cancelName");
 
 let pending = null;
+let hasPlayed = false;
 
 function openOverlay() {
   overlay.classList.add("show");
   nicknameInput.value = "";
   nicknameInput.focus();
 }
+
 function closeOverlay() {
   overlay.classList.remove("show");
   pending = null;
 }
 
-closeOverlay();
+function clearUI() {
+  overlay.classList.remove("show");
+  toastEl.classList.remove("show");
+}
+
+clearUI();
 
 const game = createGame(canvas, {
   toast: showToast,
   onGameOver: async (score, maxCombo) => {
+    if (!hasPlayed) return;
+    hasPlayed = false;
+
     if ((Number(score) || 0) <= 0) {
-      await refreshLeaderboard(showToast);
+      refreshLeaderboard(showToast);
       return;
     }
 
@@ -69,34 +75,37 @@ const game = createGame(canvas, {
   }
 });
 
-function safeCloseOnAction() {
-  if (overlay.classList.contains("show")) closeOverlay();
-}
-
-btnStart?.addEventListener("click", () => {
-  safeCloseOnAction();
+btnStart.addEventListener("click", () => {
+  clearUI();
+  hasPlayed = true;
   game.start();
 });
 
-btnRestart?.addEventListener("click", () => {
-  safeCloseOnAction();
+btnRestart.addEventListener("click", () => {
+  clearUI();
+  hasPlayed = true;
   game.restart();
 });
 
-btnPause?.addEventListener("click", () => {
-  safeCloseOnAction();
-  const st = game.getState();
-  if (st === "play") game.pause();
-  else if (st === "pause") game.resume();
-  else showToast("플레이 중에만 일시정지 가능");
+window.addEventListener("keydown", (e) => {
+  if (e.code === "Space") {
+    clearUI();
+    hasPlayed = true;
+    game.start();
+  }
+  if (e.code === "KeyR") {
+    clearUI();
+    hasPlayed = true;
+    game.restart();
+  }
 });
 
-cancelNameBtn?.addEventListener("click", () => {
+cancelNameBtn.addEventListener("click", () => {
   closeOverlay();
   showToast("저장을 취소했습니다.");
 });
 
-submitNameBtn?.addEventListener("click", async () => {
+submitNameBtn.addEventListener("click", async () => {
   if (!pending) return;
 
   const name = normalizeNickname(nicknameInput.value);
@@ -120,7 +129,7 @@ submitNameBtn?.addEventListener("click", async () => {
   }
 });
 
-nicknameInput?.addEventListener("keydown", (e) => {
+nicknameInput.addEventListener("keydown", (e) => {
   if (e.key === "Enter") submitNameBtn.click();
   if (e.key === "Escape") cancelNameBtn.click();
 });
