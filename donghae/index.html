@@ -2,18 +2,42 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<title>동해중 준비물 / 숙제</title>
+<title>1-2 오늘의 준비물 숙제 알림</title>
 <link rel="stylesheet" href="style.css">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 </head>
 
 <body>
 
-<h1>동해중 준비물 / 숙제 알림</h1>
+<header>
+<img src="logo.png" class="logo">
 
+<h1>1-2 오늘의 준비물, 숙제 그리고 알림</h1>
+</header>
+
+
+<div class="filters">
+<button onclick="filterType('all')">전체</button>
+<button onclick="filterType('homework')">숙제</button>
+<button onclick="filterType('supply')">준비물</button>
+</div>
+
+
+<section>
+
+<h2>📅 오늘 숙제</h2>
+<div id="todayHomework"></div>
+
+<h2>🎒 내일 준비물</h2>
+<div id="tomorrowSupply"></div>
+
+<h2>📢 알림</h2>
 <div id="noticeList"></div>
 
-<script src="script.js"></script>
+</section>
+
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+<script src="main.js"></script>
 
 </body>
 </html>
