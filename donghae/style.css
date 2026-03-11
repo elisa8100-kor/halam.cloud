@@ -6,17 +6,19 @@ margin:0;
 
 header{
 display:flex;
-align-items:center;
 justify-content:center;
-position:relative;
-padding:20px;
+align-items:center;
 background:white;
+padding:30px;
+position:relative;
 }
 
 .logo{
 position:absolute;
 left:20px;
-width:60px;
+top:5px;
+width:140px;
+height:auto;
 }
 
 h1{
@@ -30,7 +32,7 @@ margin:20px;
 }
 
 button{
-padding:8px 16px;
+padding:8px 15px;
 margin:5px;
 border:none;
 background:#2d6cdf;
@@ -54,5 +56,11 @@ cursor:pointer;
 }
 
 .card:hover{
-background:#f0f4ff;
+background:#eef3ff;
+}
+
+.adminBtn{
+margin-left:10px;
+color:red;
+cursor:pointer;
 }
