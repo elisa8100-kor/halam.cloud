@@ -1,78 +1,58 @@
 body{
-    font-family: "Noto Sans KR", sans-serif;
-    background:#f3f6fb;
-    margin:0;
-    padding:0;
+font-family:sans-serif;
+background:#f4f6f8;
+margin:0;
 }
 
-/* 상단 제목 */
+header{
+display:flex;
+align-items:center;
+justify-content:center;
+position:relative;
+padding:20px;
+background:white;
+}
+
+.logo{
+position:absolute;
+left:20px;
+width:60px;
+}
+
 h1{
-    background:#2c7be5;
-    color:white;
-    margin:0;
-    padding:20px;
-    text-align:center;
-    font-size:24px;
+margin:0;
+font-size:28px;
 }
 
-/* 공지 목록 영역 */
-#noticeList{
-    max-width:700px;
-    margin:30px auto;
-    padding:10px;
+.filters{
+text-align:center;
+margin:20px;
 }
 
-/* 공지 카드 */
-.notice{
-    background:white;
-    padding:18px;
-    margin-bottom:15px;
-    border-radius:12px;
-    box-shadow:0 4px 12px rgba(0,0,0,0.08);
-    text-align:left;
-    transition:0.2s;
+button{
+padding:8px 16px;
+margin:5px;
+border:none;
+background:#2d6cdf;
+color:white;
+border-radius:6px;
+cursor:pointer;
 }
 
-/* 마우스 올리면 살짝 뜸 */
-.notice:hover{
-    transform:translateY(-2px);
-    box-shadow:0 6px 16px rgba(0,0,0,0.12);
+section{
+max-width:700px;
+margin:auto;
 }
 
-/* 제목 */
-.notice h3{
-    margin:0 0 10px 0;
-    color:#1a1a1a;
-    font-size:18px;
+.card{
+background:white;
+padding:15px;
+margin:10px 0;
+border-radius:10px;
+box-shadow:0 2px 6px rgba(0,0,0,0.1);
+cursor:pointer;
 }
 
-/* 내용 */
-.notice p{
-    margin:0 0 10px 0;
-    color:#444;
-    line-height:1.5;
-}
-
-/* 날짜 */
-.notice small{
-    color:#888;
-    font-size:12px;
-}
-
-/* 모바일 */
-@media (max-width:600px){
-
-    h1{
-        font-size:20px;
-        padding:15px;
-    }
-
-    #noticeList{
-        margin:15px;
-    }
-
-    .notice{
-        padding:15px;
-    }
-
+.card:hover{
+background:#f0f4ff;
 }
