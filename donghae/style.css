@@ -1,0 +1,78 @@
+body{
+    font-family: "Noto Sans KR", sans-serif;
+    background:#f3f6fb;
+    margin:0;
+    padding:0;
+}
+
+/* 상단 제목 */
+h1{
+    background:#2c7be5;
+    color:white;
+    margin:0;
+    padding:20px;
+    text-align:center;
+    font-size:24px;
+}
+
+/* 공지 목록 영역 */
+#noticeList{
+    max-width:700px;
+    margin:30px auto;
+    padding:10px;
+}
+
+/* 공지 카드 */
+.notice{
+    background:white;
+    padding:18px;
+    margin-bottom:15px;
+    border-radius:12px;
+    box-shadow:0 4px 12px rgba(0,0,0,0.08);
+    text-align:left;
+    transition:0.2s;
+}
+
+/* 마우스 올리면 살짝 뜸 */
+.notice:hover{
+    transform:translateY(-2px);
+    box-shadow:0 6px 16px rgba(0,0,0,0.12);
+}
+
+/* 제목 */
+.notice h3{
+    margin:0 0 10px 0;
+    color:#1a1a1a;
+    font-size:18px;
+}
+
+/* 내용 */
+.notice p{
+    margin:0 0 10px 0;
+    color:#444;
+    line-height:1.5;
+}
+
+/* 날짜 */
+.notice small{
+    color:#888;
+    font-size:12px;
+}
+
+/* 모바일 */
+@media (max-width:600px){
+
+    h1{
+        font-size:20px;
+        padding:15px;
+    }
+
+    #noticeList{
+        margin:15px;
+    }
+
+    .notice{
+        padding:15px;
+    }
+
+}
