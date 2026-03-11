@@ -1,48 +1,24 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html>
 <head>
 <meta charset="UTF-8">
-<title>공지 관리자</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-<style>
-
-body{
-font-family:sans-serif;
-background:#f2f4f8;
-text-align:center;
-}
-
-.panel{
-background:white;
-width:400px;
-margin:60px auto;
-padding:20px;
-border-radius:10px;
-box-shadow:0 0 10px rgba(0,0,0,0.1);
-}
-
-input,textarea{
-width:100%;
-padding:10px;
-margin-top:10px;
-}
-
-button{
-margin-top:15px;
-padding:10px 20px;
-background:#2c7be5;
-color:white;
-border:none;
-border-radius:5px;
-cursor:pointer;
-}
-
-</style>
+<title>관리자</title>
+<link rel="stylesheet" href="../style.css">
 </head>
 
 <body>
 
-<div class="panel">
+<div id="login">
+
+<h2>관리자 로그인</h2>
+
+<input type="password" id="pw">
+<button onclick="login()">로그인</button>
+
+</div>
+
+
+<div id="panel" style="display:none">
 
 <h2>공지 추가</h2>
 
@@ -50,10 +26,20 @@ cursor:pointer;
 
 <textarea id="content" placeholder="내용"></textarea>
 
-<button onclick="addNotice()">공지 추가</button>
+<select id="type">
+<option value="notice">공지</option>
+<option value="homework">숙제</option>
+<option value="supply">준비물</option>
+</select>
+
+<input type="date" id="date">
+
+<button onclick="addNotice()">추가</button>
 
 </div>
 
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 <script src="admin.js"></script>
 
 </body>
