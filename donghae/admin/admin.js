@@ -1,11 +1,11 @@
-const supabaseClient = window.supabase.createClient(
-"https://hkswzghtmeeftjmnnsmx.supabase.co",
-"sb_publishable_5YfaypCKMP8y_H_u3_dBGw_MZ9CIPG9"
-)
+const supabaseUrl="https://hkswzghtmeeftjmnnsmx.supabase.co"
+const supabaseKey="sb_publishable_5YfaypCKMP8y_H_u3_dBGw_MZ9CIPG9"
+
+const sb = supabase.createClient(supabaseUrl,supabaseKey)
 
 function login(){
 
-const pw=document.getElementById("pw").value
+const pw=document.getElementById("pw").value.trim()
 
 if(pw==="donghae2026"){
 
@@ -13,6 +13,10 @@ document.getElementById("login").style.display="none"
 document.getElementById("panel").style.display="block"
 
 loadList()
+
+}else{
+
+alert("비밀번호 틀림")
 
 }
 
@@ -25,7 +29,7 @@ const content=document.getElementById("content").value
 const type=document.getElementById("type").value
 const due_date=document.getElementById("date").value
 
-await supabaseClient
+await sb
 .from("notices")
 .insert([{title,content,type,due_date}])
 
@@ -37,35 +41,30 @@ loadList()
 
 async function loadList(){
 
-const { data } = await supabaseClient
+const { data } = await sb
 .from("notices")
 .select("*")
 .order("created_at",{ascending:false})
 
-const container=document.getElementById("list")
-container.innerHTML=""
+const box=document.getElementById("list")
+box.innerHTML=""
 
 data.forEach(n=>{
 
 const div=document.createElement("div")
 div.className="card"
 
-div.innerHTML=`
-<b>${n.title}</b>
-<span class="adminBtn" onclick="deleteNotice(${n.id})">삭제</span>
-`
+div.innerHTML=`${n.title} <button onclick="del(${n.id})">삭제</button>`
 
-container.appendChild(div)
+box.appendChild(div)
 
 })
 
 }
 
-async function deleteNotice(id){
+async function del(id){
 
-if(!confirm("삭제?")) return
-
-await supabaseClient
+await sb
 .from("notices")
 .delete()
 .eq("id",id)
