@@ -1,11 +1,7 @@
-// Supabase 연결 (변수 이름 충돌 방지)
 const SUPABASE_URL = "https://hkswzghtmeeftjmnnsmx.supabase.co"
 const SUPABASE_KEY = "sb_publishable_5YfaypCKMP8y_H_u3_dBGw_MZ9CIPG9"
 
-// 라이브러리에서 createClient만 가져오기
 const { createClient } = window.supabase
-
-// supabase 대신 db 사용
 const db = createClient(SUPABASE_URL, SUPABASE_KEY)
 
 let notices = []
@@ -27,14 +23,15 @@ renderNotice()
 
 function renderToday(){
 
-const today = new Date().toISOString().split("T")[0]
-
-const list = notices.filter(n =>
-n.type === "homework" && n.due_date === today
-)
-
 const box = document.getElementById("todayHomework")
 box.innerHTML = ""
+
+const list = notices.filter(n => n.type === "homework")
+
+if(list.length === 0){
+box.innerHTML = "<div class='card'>오늘 숙제 없음</div>"
+return
+}
 
 list.forEach(n=>{
 
@@ -54,16 +51,15 @@ box.appendChild(div)
 
 function renderTomorrow(){
 
-const d = new Date()
-d.setDate(d.getDate()+1)
-const tomorrow = d.toISOString().split("T")[0]
-
-const list = notices.filter(n =>
-n.type === "supply" && n.due_date === tomorrow
-)
-
 const box = document.getElementById("tomorrowSupply")
 box.innerHTML = ""
+
+const list = notices.filter(n => n.type === "supply")
+
+if(list.length === 0){
+box.innerHTML = "<div class='card'>준비물 없음</div>"
+return
+}
 
 list.forEach(n=>{
 
