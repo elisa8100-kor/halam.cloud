@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>공지 관리자</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+<style>
+
+body{
+font-family:sans-serif;
+background:#f2f4f8;
+text-align:center;
+}
+
+.panel{
+background:white;
+width:400px;
+margin:60px auto;
+padding:20px;
+border-radius:10px;
+box-shadow:0 0 10px rgba(0,0,0,0.1);
+}
+
+input,textarea{
+width:100%;
+padding:10px;
+margin-top:10px;
+}
+
+button{
+margin-top:15px;
+padding:10px 20px;
+background:#2c7be5;
+color:white;
+border:none;
+border-radius:5px;
+cursor:pointer;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="panel">
+
+<h2>공지 추가</h2>
+
+<input id="title" placeholder="제목">
+
+<textarea id="content" placeholder="내용"></textarea>
+
+<button onclick="addNotice()">공지 추가</button>
+
+</div>
+
+<script src="admin.js"></script>
+
+</body>
+</html>
