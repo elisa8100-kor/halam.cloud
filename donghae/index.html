@@ -1,6 +1,145 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>1-2 숙제와 준비물</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="app" class="app">
+    <header class="topbar">
+      <img src="logo.jpg" alt="동해중 로고" class="logo" />
+      <h1>1-2 숙제와 준비물</h1>
+      <button id="menuBtn" class="menu-btn" aria-label="메뉴 열기">☰</button>
+    </header>
+
+    <aside id="sideMenu" class="side-menu">
+      <div class="side-header">
+        <strong>메뉴</strong>
+        <button id="closeMenuBtn" class="close-btn">✕</button>
+      </div>
+
+      <button class="menu-item" data-filter="all">전체</button>
+      <button class="menu-item" data-filter="homework">숙제</button>
+      <button class="menu-item" data-filter="supply">준비물</button>
+      <button class="menu-item" data-filter="lost">분실물</button>
+      <button class="menu-item" data-filter="notice">공지</button>
+      <button class="menu-item" data-filter="settings">설정</button>
+    </aside>
+
+    <div id="menuOverlay" class="overlay"></div>
+
+    <main class="container">
+      <section id="settingsPanel" class="panel hidden">
+        <div class="section-card">
+          <h2>설정</h2>
+
+          <div class="setting-row">
+            <span>다크모드</span>
+            <label class="switch">
+              <input type="checkbox" id="darkModeToggle" />
+              <span></span>
+            </label>
+          </div>
+
+          <div class="setting-row">
+            <span>음소거</span>
+            <label class="switch">
+              <input type="checkbox" id="muteToggle" />
+              <span></span>
+            </label>
+          </div>
+
+          <div class="setting-row">
+            <span>알림 받기</span>
+            <label class="switch">
+              <input type="checkbox" id="notifyToggle" />
+              <span></span>
+            </label>
+          </div>
+
+          <div class="setting-row">
+            <span>접기 상태 기억</span>
+            <label class="switch">
+              <input type="checkbox" id="rememberCollapseToggle" />
+              <span></span>
+            </label>
+          </div>
+
+          <div class="setting-row">
+            <span>자동 새로고침</span>
+            <label class="switch">
+              <input type="checkbox" id="autoRefreshToggle" />
+              <span></span>
+            </label>
+          </div>
+
+          <div class="setting-row">
+            <span>데이터 절약 모드</span>
+            <label class="switch">
+              <input type="checkbox" id="dataSaverToggle" />
+              <span></span>
+            </label>
+          </div>
+
+          <div class="setting-row">
+            <span>글자 크기</span>
+            <select id="fontSizeSelect" class="setting-select">
+              <option value="small">작게</option>
+              <option value="normal">보통</option>
+              <option value="large">크게</option>
+            </select>
+          </div>
+
+          <div class="setting-row">
+            <button id="resetSettingsBtn" class="secondary-btn">설정 초기화</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="contentPanel">
+        <div id="homeworkSection" class="section-card">
+          <div class="section-head">
+            <h2>📚 오늘 숙제</h2>
+            <button class="collapse-btn" data-target="homeworkList">−</button>
+          </div>
+          <div id="homeworkList" class="list-area"></div>
+        </div>
+
+        <div id="supplySection" class="section-card">
+          <div class="section-head">
+            <h2>🎒 내일 준비물</h2>
+            <button class="collapse-btn" data-target="supplyList">−</button>
+          </div>
+          <div id="supplyList" class="list-area"></div>
+        </div>
+
+        <div id="lostSection" class="section-card">
+          <div class="section-head">
+            <h2>🧢 분실물</h2>
+            <button class="collapse-btn" data-target="lostList">−</button>
+          </div>
+          <div id="lostList" class="list-area"></div>
+        </div>
+
+        <div id="noticeSection" class="section-card">
+          <div class="section-head">
+            <h2>📢 공지</h2>
+            <button class="collapse-btn" data-target="noticeList">−</button>
+          </div>
+          <div id="noticeList" class="list-area"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="main.js"></script>
+</body>
+</html><!DOCTYPE html>
+<html lang="ko">
+<head>
 <meta charset="UTF-8">
 <title>1-2 오늘의 준비물∙숙제 알림</title>
 <link rel="stylesheet" href="style.css">
