@@ -97,42 +97,44 @@
           </div>
         </div>
       </section>
+
+      <section id="contentPanel">
+        <div id="homeworkSection" class="section-card">
+          <div class="section-head">
+            <h2>📚 오늘 숙제</h2>
+            <button class="collapse-btn" data-target="homeworkList">−</button>
+          </div>
+          <div id="homeworkList" class="list-area"></div>
+        </div>
+
+        <div id="supplySection" class="section-card">
+          <div class="section-head">
+            <h2>🎒 내일 준비물</h2>
+            <button class="collapse-btn" data-target="supplyList">−</button>
+          </div>
+          <div id="supplyList" class="list-area"></div>
+        </div>
+
+        <div id="lostSection" class="section-card">
+          <div class="section-head">
+            <h2>🧢 분실물</h2>
+            <button class="collapse-btn" data-target="lostList">−</button>
+          </div>
+          <div id="lostList" class="list-area"></div>
+        </div>
+
+        <div id="noticeSection" class="section-card">
+          <div class="section-head">
+            <h2>📢 공지</h2>
+            <button class="collapse-btn" data-target="noticeList">−</button>
+          </div>
+          <div id="noticeList" class="list-area"></div>
+        </div>
+      </section>
     </main>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="main.js"></script>
-</body>
-</html><!DOCTYPE html>
-<html lang="ko">
-<head>
-<meta charset="UTF-8">
-<title>1-2 오늘의 준비물∙숙제 알림</title>
-<link rel="stylesheet" href="style.css">
-</head>
-
-<body>
-
-<header>
-<img src="logo.jpg" class="logo">
-<h1>1-2 오늘의 준비물과 숙제</h1>
-</header>
-
-<section>
-
-<h2>📅 오늘 숙제</h2>
-<div id="todayHomework"></div>
-
-<h2>🎒 내일 준비물</h2>
-<div id="tomorrowSupply"></div>
-
-<h2>📢 공지사항</h2>
-<div id="noticeList"></div>
-
-</section>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="main.js"></script>
-
 </body>
 </html>
