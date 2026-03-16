@@ -1,49 +1,179 @@
 <!DOCTYPE html>
-<html>
+<html lang="ko">
 <head>
-<meta charset="UTF-8">
-<title>관리자</title>
-<link rel="stylesheet" href="../style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>동해중 관리자</title>
+  <link rel="stylesheet" href="../style.css" />
+  <style>
+    body{
+      background:#f4f6f8;
+      margin:0;
+      font-family:sans-serif;
+    }
+    .admin-wrap{
+      max-width:950px;
+      margin:24px auto;
+      padding:0 14px 30px;
+    }
+    .admin-card{
+      background:#fff;
+      border:1px solid #dfe6ee;
+      border-radius:18px;
+      box-shadow:0 6px 18px rgba(0,0,0,0.08);
+      padding:18px;
+      margin-bottom:16px;
+    }
+    .admin-title{
+      margin:0 0 10px;
+      font-size:1.4rem;
+    }
+    .admin-sub{
+      margin:0 0 14px;
+      color:#666;
+    }
+    .form-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+    }
+    .full{
+      grid-column:1 / -1;
+    }
+    input, textarea, select{
+      width:100%;
+      padding:12px 14px;
+      border:1px solid #dfe6ee;
+      border-radius:12px;
+      font-size:15px;
+      box-sizing:border-box;
+    }
+    textarea{
+      min-height:140px;
+      resize:vertical;
+    }
+    .row{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:12px;
+    }
+    .btn{
+      border:none;
+      border-radius:10px;
+      padding:10px 14px;
+      cursor:pointer;
+    }
+    .primary{ background:#2d6cdf; color:#fff; }
+    .secondary{ background:#edf2ff; color:#2d6cdf; }
+    .danger{ background:#ffe6e6; color:#c62828; }
+    .warn{ background:#fff3dd; color:#9a6500; }
+    .status{
+      min-height:22px;
+      margin-top:12px;
+      color:#2d6cdf;
+      font-size:14px;
+    }
+    .list{
+      display:grid;
+      gap:12px;
+    }
+    .item{
+      border:1px solid #dfe6ee;
+      border-radius:14px;
+      padding:14px;
+      background:#f9fbff;
+    }
+    .top{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      align-items:flex-start;
+    }
+    .actions{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+    .badge{
+      display:inline-block;
+      padding:4px 8px;
+      border-radius:999px;
+      background:#edf2ff;
+      color:#2d6cdf;
+      font-size:12px;
+      margin-right:6px;
+      margin-bottom:6px;
+    }
+    #panel{
+      display:none;
+    }
+    @media (max-width:700px){
+      .form-grid{ grid-template-columns:1fr; }
+      .top{ flex-direction:column; }
+    }
+  </style>
 </head>
-
 <body>
+  <div class="admin-wrap">
+    <div id="login" class="admin-card">
+      <h2 class="admin-title">동해중 관리자 로그인</h2>
+      <p class="admin-sub">비밀번호를 입력하세요.</p>
+      <input type="password" id="pw" placeholder="비밀번호" onkeydown="if(event.key==='Enter') login()" />
+      <div class="row">
+        <button class="btn primary" onclick="login()">로그인</button>
+      </div>
+      <div id="loginStatus" class="status"></div>
+    </div>
 
-<div id="login">
+    <div id="panel">
+      <div class="admin-card">
+        <h2 class="admin-title">글 작성 / 수정</h2>
+        <p class="admin-sub">공지, 숙제, 준비물, 분실물을 등록할 수 있습니다.</p>
 
-<h2>관리자 로그인</h2>
+        <div class="form-grid">
+          <div class="full">
+            <input id="title" placeholder="제목" />
+          </div>
 
-<input type="password" id="pw">
-<button onclick="login()">로그인</button>
+          <div>
+            <select id="type">
+              <option value="notice">공지</option>
+              <option value="homework">숙제</option>
+              <option value="supply">준비물</option>
+              <option value="lost">분실물</option>
+            </select>
+          </div>
 
-</div>
+          <div>
+            <input id="date" type="date" />
+          </div>
 
+          <div class="full">
+            <input id="tags" placeholder="태그 (쉼표로 구분, 예: 시험,중요)" />
+          </div>
 
-<div id="panel" style="display:none">
+          <div class="full">
+            <textarea id="content" placeholder="내용 / 설명"></textarea>
+          </div>
+        </div>
 
-<h2>공지 추가</h2>
+        <div class="row">
+          <button id="saveBtn" class="btn primary" onclick="saveNotice()">추가</button>
+          <button class="btn secondary" onclick="resetForm()">초기화</button>
+        </div>
 
-<input id="title" placeholder="제목"><br><br>
+        <div id="formStatus" class="status"></div>
+      </div>
 
-<textarea id="content" placeholder="내용"></textarea><br><br>
+      <div class="admin-card">
+        <h2 class="admin-title">등록된 글</h2>
+        <div id="list" class="list"></div>
+      </div>
+    </div>
+  </div>
 
-<select id="type">
-<option value="notice">공지</option>
-<option value="homework">숙제</option>
-<option value="supply">준비물</option>
-</select>
-
-<input type="date" id="date">
-
-<button onclick="addNotice()">추가</button>
-
-<h2>공지 목록</h2>
-
-<div id="list"></div>
-
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="admin.js"></script>
-
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="admin.js"></script>
 </body>
 </html>
