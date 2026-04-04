@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="refresh" content="0; url=https://canva.link/clubppt" />
+  <title>Redirect</title>
+  <script>
+    window.location.href = "https://canva.link/clubppt";
+  </script>
+</head>
+<body>
+</body>
+</html>
