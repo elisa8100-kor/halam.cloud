@@ -1,21 +1,12 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>나의 AI</title>
+<h2>AI 동물 분류기</h2>
 
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image"></script>
-</head>
-
-<body>
-
-<h1>Teachable Machine AI</h1>
-
-<button onclick="init()">AI 시작</button>
+<button type="button" onclick="init()">카메라 시작</button>
 
 <div id="webcam-container"></div>
 <div id="label-container"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
 
 <script>
 const URL = "https://teachablemachine.withgoogle.com/models/_ehZC_LBU/";
@@ -23,20 +14,17 @@ const URL = "https://teachablemachine.withgoogle.com/models/_ehZC_LBU/";
 let model, webcam, labelContainer, maxPredictions;
 
 async function init() {
-
     const modelURL = URL + "model.json";
     const metadataURL = URL + "metadata.json";
 
     model = await tmImage.load(modelURL, metadataURL);
-
     maxPredictions = model.getTotalClasses();
 
-    webcam = new tmImage.Webcam(300, 300, true);
+    webcam = new tmImage.Webcam(400, 400, true);
     await webcam.setup();
     await webcam.play();
 
-    document.getElementById("webcam-container")
-        .appendChild(webcam.canvas);
+    document.getElementById("webcam-container").appendChild(webcam.canvas);
 
     labelContainer = document.getElementById("label-container");
 
@@ -48,27 +36,18 @@ async function init() {
 }
 
 async function loop() {
-
     webcam.update();
     await predict();
-
     window.requestAnimationFrame(loop);
 }
 
 async function predict() {
-
     const prediction = await model.predict(webcam.canvas);
 
     for (let i = 0; i < maxPredictions; i++) {
-
         labelContainer.childNodes[i].innerHTML =
-            prediction[i].className +
-            ": " +
-            (prediction[i].probability * 100).toFixed(1) +
-            "%";
+            prediction[i].className + ": " +
+            (prediction[i].probability * 100).toFixed(1) + "%";
     }
 }
 </script>
-
-</body>
-</html>
