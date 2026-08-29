@@ -1,129 +1,74 @@
-```html
 <!DOCTYPE html>
-<html lang="ko">
+<html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>나의 AI 이미지 분류기</title>
+    <title>나의 AI</title>
 
-    <!-- TensorFlow.js -->
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
-
-    <!-- Teachable Machine -->
-    <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
-
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin-top: 40px;
-        }
-
-        button {
-            padding: 12px 25px;
-            font-size: 18px;
-            cursor: pointer;
-        }
-
-        #webcam-container {
-            margin: 20px;
-        }
-
-        #label-container {
-            font-size: 20px;
-            line-height: 1.8;
-        }
-    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image"></script>
 </head>
 
 <body>
 
-    <h1>🤖 나의 AI 이미지 분류기</h1>
+<h1>Teachable Machine AI</h1>
 
-    <p>카메라를 켜고 AI가 무엇인지 판단하게 해보세요.</p>
+<button onclick="init()">AI 시작</button>
 
-    <button onclick="init()">AI 시작</button>
+<div id="webcam-container"></div>
+<div id="label-container"></div>
 
-    <div id="webcam-container"></div>
-    <div id="label-container"></div>
+<script>
+const URL = "https://teachablemachine.withgoogle.com/models/_ehZC_LBU/";
 
-    <script>
-        // ⭐ Teachable Machine 모델 주소
-        const URL = "https://teachablemachine.withgoogle.com/models/_ehZC_LBU/";
+let model, webcam, labelContainer, maxPredictions;
 
-        let model;
-        let webcam;
-        let labelContainer;
-        let maxPredictions;
+async function init() {
 
-        // AI 시작
-        async function init() {
+    const modelURL = URL + "model.json";
+    const metadataURL = URL + "metadata.json";
 
-            const modelURL = URL + "model.json";
-            const metadataURL = URL + "metadata.json";
+    model = await tmImage.load(modelURL, metadataURL);
 
-            // 모델 불러오기
-            model = await tmImage.load(modelURL, metadataURL);
+    maxPredictions = model.getTotalClasses();
 
-            maxPredictions = model.getTotalClasses();
+    webcam = new tmImage.Webcam(300, 300, true);
+    await webcam.setup();
+    await webcam.play();
 
-            // 카메라 설정
-            const flip = true;
+    document.getElementById("webcam-container")
+        .appendChild(webcam.canvas);
 
-            webcam = new tmImage.Webcam(300, 300, flip);
+    labelContainer = document.getElementById("label-container");
 
-            await webcam.setup();
-            await webcam.play();
+    for (let i = 0; i < maxPredictions; i++) {
+        labelContainer.appendChild(document.createElement("div"));
+    }
 
-            // 화면에 카메라 표시
-            document
-                .getElementById("webcam-container")
-                .appendChild(webcam.canvas);
+    window.requestAnimationFrame(loop);
+}
 
-            // 결과 표시 영역
-            labelContainer =
-                document.getElementById("label-container");
+async function loop() {
 
-            for (let i = 0; i < maxPredictions; i++) {
-                labelContainer.appendChild(
-                    document.createElement("div")
-                );
-            }
+    webcam.update();
+    await predict();
 
-            // AI 실행
-            window.requestAnimationFrame(loop);
-        }
+    window.requestAnimationFrame(loop);
+}
 
-        // 계속 카메라 분석
-        async function loop() {
+async function predict() {
 
-            webcam.update();
+    const prediction = await model.predict(webcam.canvas);
 
-            await predict();
+    for (let i = 0; i < maxPredictions; i++) {
 
-            window.requestAnimationFrame(loop);
-        }
-
-        // AI 예측
-        async function predict() {
-
-            const prediction =
-                await model.predict(webcam.canvas);
-
-            for (let i = 0; i < maxPredictions; i++) {
-
-                const percentage =
-                    (prediction[i].probability * 100).toFixed(1);
-
-                labelContainer.childNodes[i].innerHTML =
-                    prediction[i].className +
-                    " : " +
-                    percentage +
-                    "%";
-            }
-        }
-    </script>
+        labelContainer.childNodes[i].innerHTML =
+            prediction[i].className +
+            ": " +
+            (prediction[i].probability * 100).toFixed(1) +
+            "%";
+    }
+}
+</script>
 
 </body>
 </html>
-```
